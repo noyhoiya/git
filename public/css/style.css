@@ -1,0 +1,92 @@
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom Theme Variables */
+@layer base {
+    body {
+        font-family: 'Noto Sans Lao', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        color: #111827; /* --text-primary */
+        background-color: #f9fafb; /* --background-light */
+    }
+}
+
+@layer components {
+    /* Buttons */
+    .btn-primary {
+        @apply bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-lg font-medium transition-colors;
+    }
+    .btn-secondary {
+        @apply bg-white hover:bg-gray-50 text-gray-800 border border-gray-300 px-6 py-3 rounded-lg font-medium transition-colors;
+    }
+
+    /* Cards */
+    .card {
+        @apply bg-white rounded-lg shadow-sm border border-gray-200 p-6;
+    }
+    .stat-card {
+        @apply bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow;
+    }
+
+    /* Inputs / Selects */
+    .input-field, .form-input, .form-select {
+        @apply w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent;
+    }
+
+    /* Table Styling */
+    .table {
+        @apply w-full border-collapse;
+    }
+    .table th, .table td {
+        @apply border border-gray-200 px-4 py-2 text-left;
+    }
+    .table thead th {
+        @apply bg-gray-100 font-semibold;
+    }
+    .table tbody tr {
+        @apply bg-white hover:bg-gray-50 transition-colors;
+    }
+    .table tbody tr:nth-child(even) {
+        @apply bg-gray-50;
+    }
+
+    /* Header */
+    .report-header {
+        @apply text-center mb-6;
+    }
+    .report-header h4 {
+        @apply text-lg mt-1 font-medium;
+    }
+    .report-header h2 {
+        @apply text-lg font-bold mt-2;
+    }
+    .report-header p {
+        @apply text-sm;
+    }
+
+    /* Modal / Print Preview */
+    .modal {
+        @apply fixed inset-0 bg-black bg-opacity-50 flex justify-center items-start pt-10 z-50;
+    }
+    .modal-content {
+        @apply bg-white rounded-lg w-[90%] max-w-5xl p-6 relative shadow-lg;
+    }
+    .modal-close {
+        @apply absolute top-4 right-4 text-gray-500 hover:text-gray-800 text-2xl cursor-pointer;
+    }
+    .modal-table {
+        @apply table table-bordered w-full border-collapse mt-4;
+    }
+    .modal-table th, .modal-table td {
+        @apply border border-gray-200 px-4 py-2 text-left;
+    }
+    .modal-table thead {
+        @apply bg-gray-100;
+    }
+
+    /* Custom Dates Flex */
+    .custom-dates {
+        @apply flex gap-2 items-end;
+    }
+}

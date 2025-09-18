@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ແຜນຜັງ ER - ໂຄງສ້າງຖານຂໍ້ມູນສູນການເງິນ</title>
+    <meta name="description" content="ແຜນຜັງຄວາມສຳພັນຂອງຖານຂໍ້ມູນສູນການເງິນ">
+    <meta name="keywords" content="ແຜນຜັງ ER, ໂຄງສ້າງຖານຂໍ້ມູນ, ສູນການເງິນ, ຄວາມສຳພັນ">
+    
+    <!-- Open Graph -->
+    <meta property="og:title" content="ແຜນຜັງ ER - ໂຄງສ້າງຖານຂໍ້ມູນສູນການເງິນ">
+    <meta property="og:description" content="ແຜນຜັງຄວາມສຳພັນຂອງຖານຂໍ້ມູນສູນການເງິນ">
+    
+    <!-- Twitter -->
+    <meta name="twitter:title" content="ແຜນຜັງ ER - ໂຄງສ້າງຖານຂໍ້ມູນສູນການເງິນ">
+    <meta name="twitter:description" content="ແຜນຜັງຄວາມສຳພັນຂອງຖານຂໍ້ມູນສູນການເງິນ">
+
+    <script src="https://resource.trickle.so/vendor_lib/unpkg/react@18/umd/react.production.min.js"></script>
+    <script src="https://resource.trickle.so/vendor_lib/unpkg/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://resource.trickle.so/vendor_lib/unpkg/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://resource.trickle.so/vendor_lib/unpkg/lucide-static@0.516.0/font/lucide.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Lao:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style type="text/tailwindcss">
+    @layer theme {
+        :root {
+            --primary-color: #10b981;
+            --secondary-color: #f0fdf4;
+            --accent-color: #059669;
+            --text-primary: #111827;
+            --text-secondary: #6b7280;
+            --border-color: #e5e7eb;
+            --background-light: #f9fafb;
+        }
+    }
+
+    @layer base {
+        body {
+            font-family: 'Noto Sans Lao', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            color: var(--text-primary);
+        }
+    }
+
+    @layer components {
+        .entity-box {
+            @apply bg-white border-2 border-[var(--primary-color)] rounded-lg p-4 shadow-lg;
+        }
+        
+        .entity-header {
+            @apply bg-[var(--primary-color)] text-white px-3 py-2 rounded-md font-bold text-center mb-3;
+        }
+        
+        .field-row {
+            @apply flex justify-between items-center py-1 border-b border-gray-100 last:border-b-0;
+        }
+        
+        .primary-key {
+            @apply text-[var(--primary-color)] font-bold;
+        }
+        
+        .foreign-key {
+            @apply text-blue-600 font-medium;
+        }
+        
+        .connection-line {
+            @apply absolute border-[var(--text-secondary)] border-2;
+        }
+    }
+    </style>
+</head>
+<body class="bg-[var(--background-light)]">
+    <div id="root"></div>
+    
+    <script type="text/babel" src="er-diagram-app.js"></script>
+</body>
+</html>
