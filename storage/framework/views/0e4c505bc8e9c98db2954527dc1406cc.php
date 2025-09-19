@@ -336,8 +336,11 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 </script>
+<script>
+  lucide.createIcons(); // initialize all icons
+</script>
 
-
+<?php echo $__env->yieldContent('scripts'); ?>  <!-- <-- ต้องอยู่ตรงนี้ -->
 
 </body>
 </html><?php /**PATH C:\xampp\htdocs\cash_center_v3\resources\views/layouts/app.blade.php ENDPATH**/ ?>

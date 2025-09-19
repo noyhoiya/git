@@ -10,10 +10,10 @@ class Vault extends Model
     use HasFactory;
 
     protected $primaryKey = 'vault_id';
-    
+
     protected $fillable = [
         'vault_name',
-        'vault_type', 
+        'vault_type',
         'current_balance_cents',
         'is_active',
     ];

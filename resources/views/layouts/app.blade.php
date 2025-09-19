@@ -333,8 +333,11 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 </script>
+<script>
+  lucide.createIcons(); // initialize all icons
+</script>
 
-
+@yield('scripts')  <!-- <-- ต้องอยู่ตรงนี้ -->
 
 </body>
 </html>
