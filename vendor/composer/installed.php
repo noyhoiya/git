@@ -3,7 +3,7 @@
         'name' => 'cash-center/laravel-app',
         'pretty_version' => 'dev-main',
         'version' => 'dev-main',
-        'reference' => 'ec3196091d3474018440935118fb17251477a5a3',
+        'reference' => '8f553cca765fc83e455cc4c28de78361c365deea',
         'type' => 'project',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -40,7 +40,7 @@
         'cash-center/laravel-app' => array(
             'pretty_version' => 'dev-main',
             'version' => 'dev-main',
-            'reference' => 'ec3196091d3474018440935118fb17251477a5a3',
+            'reference' => '8f553cca765fc83e455cc4c28de78361c365deea',
             'type' => 'project',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),

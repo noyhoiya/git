@@ -5,6 +5,9 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://resource.trickle.so/vendor_lib/unpkg/lucide-static@0.516.0/font/lucide.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.9/dist/chart.umd.min.js"></script>
+    <script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
+<script src="https://unpkg.com/@pdf-lib/fontkit/dist/fontkit.umd.js"></script>
+
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Lao:wght@400;500;600;700&display=swap" rel="stylesheet">
      <style type="text/tailwindcss">
     @layer theme {
@@ -51,17 +54,17 @@
         }
     }
     </style>
+
 <?php $__env->startSection('content'); ?>
 <div class="max-w-6xl mx-auto p-8">
     <h2 class="text-2xl font-bold mb-6">ລາຍການຄຳຮ້ອງຂໍ</h2>
 
-    <a href="<?php echo e(route('cash-requests.create')); ?>" 
-       class="btn-primary inline-block mb-6">
-       ສ້າງຄຳຮ້ອງໃໝ່
+    <a href="<?php echo e(route('cash-requests.create')); ?>" class="bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded mb-6 inline-block">
+        ສ້າງຄຳຮ້ອງໃໝ່
     </a>
 
-    <div class="overflow-x-auto bg-white rounded-lg shadow ">
-        <table class="w-full border-collapse ">
+    <div class="overflow-x-auto bg-white rounded-lg shadow">
+        <table class="w-full border-collapse">
             <thead>
                 <tr class="bg-gray-200 text-left text-sm font-semibold text-gray-700">
                     <th class="px-4 py-3 border">ID</th>
@@ -75,71 +78,172 @@
                 </tr>
             </thead>
             <tbody class="text-sm">
-                <?php $__currentLoopData = $cashRequests; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $request): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                    <?php
-                        $statusLabels = [
-                            'PENDING' => 'ລໍຖ້າອະນຸມັດ',
-                            'APPROVED' => 'ອະນຸມັດແລ້ວ',
-                            'REJECTED' => 'ປະຕິເສດແລ້ວ',
-                        ];
-                    ?>
+                
+                <?php $__currentLoopData = $cashRequests; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $cashRequest): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                     <tr class="hover:bg-gray-50">
-                        <td class="px-4 py-2 border"><?php echo e($request->request_id); ?></td>
-                        <td class="px-4 py-2 border"><?php echo e($request->requesterVault->vault_name ?? '-'); ?></td>
-                        <td class="px-4 py-2 border"><?php echo e($request->requesterUser->full_name ?? '-'); ?></td>
-                        <td class="px-4 py-2 border font-semibold"><?php echo e(number_format($request->amount)); ?> ₭</td>
-                        <td class="px-4 py-2 border"><?php echo e($request->purpose->purpose_name ?? $request->purpose_text); ?></td>
-                        <td class="px-4 py-2 border">
-                            <?php if($request->status == 'PENDING'): ?>
-                                <span class="px-2 py-1 text-xs font-medium rounded bg-yellow-100 text-yellow-700">
-                                    <?php echo e($statusLabels[$request->status]); ?>
+                        <td class="px-4 py-2 border"><?php echo e($cashRequest->request_id); ?></td>
+                        <td class="px-4 py-2 border"><?php echo e($cashRequest->requesterVault->vault_name ?? '-'); ?></td>
+                        <td class="px-4 py-2 border"><?php echo e($cashRequest->requesterUser->full_name ?? '-'); ?></td>
+                        <td class="px-4 py-2 border font-semibold"><?php echo e(number_format($cashRequest->amount)); ?> ກີບ</td>
+                        <td class="px-4 py-2 border"><?php echo e($cashRequest->purpose->purpose_name ?? $cashRequest->purpose_text); ?></td>
+                        <td class="px-4 py-2 border"><?php echo e($cashRequest->status); ?></td>
+                        <td class="px-4 py-2 border"><?php echo e($cashRequest->created_at->format('Y-m-d H:i')); ?></td>
+                   <td class="px-2 py-2 border text-center space-x-1 flex justify-center items-center">
 
-                                </span>
-                            <?php elseif($request->status == 'APPROVED'): ?>
-                                <span class="px-2 py-1 text-xs font-medium rounded bg-green-100 text-green-700">
-                                    <?php echo e($statusLabels[$request->status]); ?>
+                        <!-- Preview button (eye icon) -->
+                        <button
+                            class="preview-btn bg-gray-500 hover:bg-blue-600 text-white p-2 rounded-full flex items-center justify-center transition-colors"
+                            data-id="<?php echo e($cashRequest->request_id); ?>"
+                            data-vault="<?php echo e($cashRequest->requesterVault->vault_name ?? '-'); ?>"
+                            data-user="<?php echo e($cashRequest->requesterUser->full_name ?? '-'); ?>"
+                            data-amount="<?php echo e(number_format($cashRequest->amount, 2)); ?> ₭"
+                            data-amount_in_words="<?php echo e($cashRequest->amount_in_words ?? '-'); ?> "
+                            data-purpose="<?php echo e($cashRequest->purpose->purpose_name ?? $cashRequest->purpose_text); ?>"
+                            data-created="<?php echo e($cashRequest->created_at->format('d/m/Y H:i')); ?>"
+                            title="Preview PDF"
+                        >
+                            <i data-lucide="eye" class="w-4 h-4"></i>
+                        </button>
 
-                                </span>
-                            <?php elseif($request->status == 'REJECTED'): ?>
-                                <span class="px-2 py-1 text-xs font-medium rounded bg-red-100 text-red-700">
-                                    <?php echo e($statusLabels[$request->status]); ?>
+                        
+                        <?php if(method_exists($cashRequest, 'isPending') && $cashRequest->isPending() && in_array(auth()->user()->role_id, [1,3,5])): ?>
+                            <form action="<?php echo e(route('cash-requests.approve', $cashRequest->request_id)); ?>" method="POST" class="inline ml-1">
+                                <?php echo csrf_field(); ?>
+                                <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-2 py-3 rounded text-xs transition-colors">
+                                    ອະນຸມັດ
+                                </button>
+                            </form>
 
-                                </span>
-                            <?php endif; ?>
-                        </td>
-                        <td class="px-4 py-2 border"><?php echo e($request->created_at->format('Y-m-d H:i')); ?></td>
-                        <td class="px-4 py-2 border text-center">
-                            <?php if($request->isPending() && in_array(auth()->user()->role_id, [1,3,5])): ?>
-                                <form action="<?php echo e(route('cash-requests.approve', $request->request_id)); ?>" method="POST" class="inline">
-                                    <?php echo csrf_field(); ?>
-                                    <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded text-xs">
-                                        ອະນຸມັດ
-                                    </button>
-                                </form>
-                                    
-                                <form action="<?php echo e(route('cash-requests.reject', $request->request_id)); ?>" method="POST" class="inline">
-                                    <?php echo csrf_field(); ?>
-                                    <button type="submit" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-xs">
-                                        ປະຕິເສດ
-                                    </button>
-                                </form>
-                            <?php else: ?>
-                                <?php if($request->status == 'APPROVED'): ?>
-                                    <span class="text-green-600 font-semibold">✔</span>
-                                <?php elseif($request->status == 'REJECTED'): ?>
-                                    <span class="text-red-600 font-semibold">✘</span>
-                                <?php else: ?>
-                                    <span class="text-gray-500">⏳</span>
-                                <?php endif; ?>
-                            <?php endif; ?>
-                        </td>
+                            <form action="<?php echo e(route('cash-requests.reject', $cashRequest->request_id)); ?>" method="POST" class="inline ml-1">
+                                <?php echo csrf_field(); ?>
+                                <button type="submit" class="bg-red-500 hover:bg-red-600 text-white px-2 py-3 rounded text-xs transition-colors">
+                                    ປະຕິເສດ
+                                </button>
+                            </form>
+                        <?php endif; ?>
+                    </td>
+
                     </tr>
                 <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
             </tbody>
         </table>
     </div>
     
+    
+    <div class="mt-4">
+        <?php echo e($cashRequests->links()); ?>
+
+    </div>
+</div>
+
+<!-- PDF Preview Modal -->
+<div id="pdfModal" class="fixed inset-0 hidden items-center justify-center bg-black bg-opacity-50 z-50">
+    <div class="bg-white w-full max-w-4xl h-[90vh] p-2 relative flex flex-col">
+        <button id="closePdfModal" class="absolute top-2 right-2 bg-red-500 text-white px-3 py-1 rounded">✕</button>
+        <!-- iframe will show the generated PDF blob -->
+        <iframe id="pdfViewer" class="w-full h-full border"></iframe>
+    </div>
 </div>
 <?php $__env->stopSection(); ?>
 
+<?php $__env->startSection('scripts'); ?>
+    
+    <script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+    const templateUrl = <?php echo json_encode(asset('assets/pdf/1.pdf')); ?>; // your PDF template
+    const previewButtons = document.querySelectorAll('.preview-btn');
+    const modal = document.getElementById('pdfModal');
+    const iframe = document.getElementById('pdfViewer');
+    const closeBtn = document.getElementById('closePdfModal');
+    let currentObjectUrl = null;
+
+    async function fetchTemplateBytes() {
+        const res = await fetch(templateUrl);
+        if (!res.ok) throw new Error('Could not load template PDF: ' + res.status);
+        return await res.arrayBuffer();
+    }
+
+    previewButtons.forEach(btn => {
+        btn.addEventListener('click', async () => {
+            try {
+                // 1. Collect data from button dataset
+                const data = {
+                    id: btn.dataset.id || '',
+                    vault: btn.dataset.vault || '',
+                    user: btn.dataset.user || '',
+                    amount: btn.dataset.amount || '',
+                    amount_in_words: btn.dataset.amount_in_words || '',
+                    purpose: btn.dataset.purpose || '',
+                    created: btn.dataset.created || ''
+                };
+
+                // 2. Load PDF template
+                const templateBytes = await fetchTemplateBytes();
+                const pdfDoc = await PDFLib.PDFDocument.load(templateBytes);
+
+                // 3. Register fontkit (required for custom TTF)
+                pdfDoc.registerFontkit(window.fontkit);
+
+                // 4. Load and embed Lao font
+                const fontBytes = await fetch('/assets/fonts/phetsarath ot.ttf')
+                    .then(res => res.arrayBuffer());
+                const laoFont = await pdfDoc.embedFont(fontBytes);
+
+                // 5. Get first page and its size
+                const pages = pdfDoc.getPages();
+                const firstPage = pages[0];
+                const { width, height } = firstPage.getSize();
+
+                // 6. Draw all text using laoFont
+                firstPage.drawText(String(data.id), { x: 340, y: height - 165, size: 12, font: laoFont, color: PDFLib.rgb(0, 0, 0) });
+                  firstPage.drawText(String(data.id), { x: 480, y: height - 115, size: 12, font: laoFont, color: PDFLib.rgb(0, 0, 0) });
+                // firstPage.drawText(String(data.vault), { x: 120, y: height - 165, size: 11, font: laoFont });
+                firstPage.drawText(String(data.user), { x: 140, y: height - 298, size: 11, font: laoFont });
+                firstPage.drawText(String(data.amount), { x: 170, y: height - 440, size: 12, font: laoFont });
+                firstPage.drawText(String(data.amount_in_words), { x: 190, y: height - 485, size: 12, maxWidth: 300,  font: laoFont });
+                firstPage.drawText(String(data.purpose), { x: 180, y: height - 390, size: 11, maxWidth: 300,letterSpacing: 0, lineHeight: 13, wordBreak: true, font: laoFont });
+                firstPage.drawText(String(data.created), { x: 480, y: height - 139, size: 11, font: laoFont });
+
+                // 7. Save PDF and show in iframe
+                const pdfBytes = await pdfDoc.save();
+                const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+
+                if (currentObjectUrl) {
+                    URL.revokeObjectURL(currentObjectUrl);
+                    currentObjectUrl = null;
+                }
+                currentObjectUrl = URL.createObjectURL(blob);
+                iframe.src = currentObjectUrl;
+
+                // 8. Open modal
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+
+            } catch (err) {
+                console.error('Preview error:', err);
+                alert('Error creating preview: ' + err.message);
+            }
+        });
+    });
+
+    // Close modal button
+    closeBtn.addEventListener('click', () => {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+        if (currentObjectUrl) {
+            URL.revokeObjectURL(currentObjectUrl);
+            currentObjectUrl = null;
+        }
+        iframe.src = '';
+    });
+
+    // Close modal if clicking outside content
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeBtn.click();
+    });
+});
+    </script>
+<?php $__env->stopSection(); ?>
 <?php echo $__env->make('layouts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\xampp\htdocs\cash_center_v3\resources\views/cash-requests/index.blade.php ENDPATH**/ ?>

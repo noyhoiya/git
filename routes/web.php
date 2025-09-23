@@ -9,6 +9,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Auth\EmailVerificationNotificationController;
 use App\Http\Controllers\Auth\EmailVerificationPromptController;
+use App\Http\Controllers\CashRequestPdfController;
 
 /*
 |--------------------------------------------------------------------------
@@ -34,6 +35,14 @@ Route::middleware(['auth'])->group(function () {
         ->name('cash-requests.approve');
     Route::post('/cash-requests/{id}/reject', [CashRequestController::class, 'reject'])
         ->name('cash-requests.reject');
+        // routes/web.php
+
+
+Route::get('/cash-requests/{id}/pdf', [CashRequestPdfController::class, 'show'])
+    ->name('cash-requests.pdf');
+// routes/web.php
+Route::get('/cash-requests', [CashRequestController::class, 'index'])->name('cash-requests.index');
+
 
 
     // Vault Movements

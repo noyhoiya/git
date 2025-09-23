@@ -109,23 +109,28 @@ return redirect()->back();
 
 
 }
-public function index()
-{
-    $cashRequests = CashRequest::with(['requesterUser', 'requesterVault', 'purpose'])
-                                ->orderBy('created_at', 'desc')
-                                ->get();
-                                
+// app/Http/Controllers/CashRequestController.php
+ public function index()
+    {
+        // use paginate(...) if you want pagination; using get() for simplicity
+        $cashRequests = CashRequest::with(['requesterVault', 'requesterUser', 'purpose'])
+                          ->orderBy('created_at', 'desc')
+                          ->paginate(10)
+;
 
-    return view('cash-requests.index', compact('cashRequests'));
+        return view('cash-requests.index', compact('cashRequests'));
+    }
+
+
+
+
+    public function show($id)
+{
+    // use variable name that is unambiguous:
+    $cashRequest = CashRequest::with(['requesterVault','requesterUser','purpose'])->findOrFail($id);
+    return view('cash_requests.show', compact('cashRequest'));
 }
 
-
-
-    public function show(CashRequest $cashRequest)
-    {
-        $cashRequest->load(['requesterUser', 'requesterVault', 'purpose', 'denominations']);
-        return view('cash-requests.show', compact('cashRequest'));
-    }
 
     public function approve($id, Request $request)
     {

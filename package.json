@@ -9,6 +9,7 @@
   "description": "A comprehensive cash center application built with Laravel for managing financial transactions, tracking cash flow, and monitoring vault operations in professional environments.",
   "main": "app.js",
   "dependencies": {
+    "@pdf-lib/fontkit": "^1.1.1",
     "browserslist": "^4.25.4",
     "caniuse-lite": "^1.0.30001741",
     "electron-to-chromium": "^1.5.214",
