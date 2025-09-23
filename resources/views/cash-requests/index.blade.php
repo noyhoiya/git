@@ -78,7 +78,6 @@
                 </tr>
             </thead>
             <tbody class="text-sm">
-                {{-- Note: use $cashRequest (singular) inside loop to avoid undefined variable errors --}}
                 @foreach($cashRequests as $cashRequest)
                     <tr class="hover:bg-gray-50">
                         <td class="px-4 py-2 border">{{ $cashRequest->request_id }}</td>
@@ -88,70 +87,47 @@
                         <td class="px-4 py-2 border">{{ $cashRequest->purpose->purpose_name ?? $cashRequest->purpose_text }}</td>
                         <td class="px-4 py-2 border">{{ $cashRequest->status }}</td>
                         <td class="px-4 py-2 border">{{ $cashRequest->created_at->format('Y-m-d H:i') }}</td>
-                   <td class="px-2 py-2 border text-center space-x-1 flex justify-center items-center">
-
-                        <!-- Preview button (eye icon) -->
-                        <button
-                            class="preview-btn bg-gray-500 hover:bg-blue-600 text-white p-2 rounded-full flex items-center justify-center transition-colors"
-                            data-id="{{ $cashRequest->request_id }}"
-                            data-vault="{{ $cashRequest->requesterVault->vault_name ?? '-' }}"
-                            data-user="{{ $cashRequest->requesterUser->full_name ?? '-' }}"
-                            data-amount="{{ number_format($cashRequest->amount, 2) }} ₭"
-                            data-amount_in_words="{{ $cashRequest->amount_in_words ?? '-' }} "
-                            data-purpose="{{ $cashRequest->purpose->purpose_name ?? $cashRequest->purpose_text }}"
-                            data-created="{{ $cashRequest->created_at->format('d/m/Y H:i') }}"
-                            title="Preview PDF"
-                        >
-                            <i data-lucide="eye" class="w-4 h-4"></i>
-                        </button>
-
-                        {{-- Approve/Reject buttons (if pending) --}}
-                        @if(method_exists($cashRequest, 'isPending') && $cashRequest->isPending() && in_array(auth()->user()->role_id, [1,3,5]))
-                            <form action="{{ route('cash-requests.approve', $cashRequest->request_id) }}" method="POST" class="inline ml-1">
-                                @csrf
-                                <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-2 py-3 rounded text-xs transition-colors">
-                                    ອະນຸມັດ
-                                </button>
-                            </form>
-
-                            <form action="{{ route('cash-requests.reject', $cashRequest->request_id) }}" method="POST" class="inline ml-1">
-                                @csrf
-                                <button type="submit" class="bg-red-500 hover:bg-red-600 text-white px-2 py-3 rounded text-xs transition-colors">
-                                    ປະຕິເສດ
-                                </button>
-                            </form>
-                        @endif
-                    </td>
-
+                        <td class="px-2 py-2 border text-center flex justify-center items-center space-x-1">
+                            <button
+                                class="preview-btn bg-gray-500 hover:bg-blue-600 text-white p-2 rounded-full"
+                                data-id="{{ $cashRequest->request_id }}"
+                                data-vault="{{ $cashRequest->requesterVault->vault_name ?? '-' }}"
+                                data-user="{{ $cashRequest->requesterUser->full_name ?? '-' }}"
+                                data-amount="{{ number_format($cashRequest->amount, 2) }} ₭"
+                                data-amount_in_words="{{ $cashRequest->amount_in_words ?? '-' }}"
+                                data-purpose="{{ $cashRequest->purpose->purpose_name ?? $cashRequest->purpose_text }}"
+                                data-created="{{ $cashRequest->created_at->format('d/m/Y H:i') }}"
+                                title="Preview PDF"
+                            >
+                                <i data-lucide="eye" class="w-4 h-4"></i>
+                            </button>
+                        </td>
                     </tr>
                 @endforeach
             </tbody>
         </table>
     </div>
-    
+
     {{-- Pagination --}}
-    <div class="mt-4">
-        {{ $cashRequests->links() }}
-    </div>
+    <div class="mt-4">{{ $cashRequests->links() }}</div>
 </div>
 
 <!-- PDF Preview Modal -->
 <div id="pdfModal" class="fixed inset-0 hidden items-center justify-center bg-black bg-opacity-50 z-50">
     <div class="bg-white w-full max-w-4xl h-[90vh] p-2 relative flex flex-col">
         <button id="closePdfModal" class="absolute top-2 right-2 bg-red-500 text-white px-3 py-1 rounded">✕</button>
-        <!-- iframe will show the generated PDF blob -->
         <iframe id="pdfViewer" class="w-full h-full border"></iframe>
     </div>
 </div>
 @endsection
 
 @section('scripts')
-    {{-- pdf-lib lib --}}
-    <script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
+<script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
+<script src="https://unpkg.com/@pdf-lib/fontkit/dist/fontkit.umd.js"></script>
 
-    <script>
-    document.addEventListener('DOMContentLoaded', function () {
-    const templateUrl = {!! json_encode(asset('assets/pdf/1.pdf')) !!}; // your PDF template
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const templateUrl = {!! json_encode(asset('assets/pdf/1.pdf')) !!};
     const previewButtons = document.querySelectorAll('.preview-btn');
     const modal = document.getElementById('pdfModal');
     const iframe = document.getElementById('pdfViewer');
@@ -164,10 +140,23 @@
         return await res.arrayBuffer();
     }
 
+    function getDenominations() {
+        // Example: replace with dynamic HTML table values if you have
+        return [
+            { denom: '', quantity: '0' },
+            { denom: '', quantity: '0' },
+            { denom: '', quantity: '0' },
+                { denom: '', quantity: '0' },
+            { denom: '', quantity: '0' },
+            { denom: '', quantity: '0' },
+                { denom: '', quantity: '0' },
+            { denom: '', quantity: '0' }
+        ];
+    }
+
     previewButtons.forEach(btn => {
         btn.addEventListener('click', async () => {
             try {
-                // 1. Collect data from button dataset
                 const data = {
                     id: btn.dataset.id || '',
                     vault: btn.dataset.vault || '',
@@ -178,45 +167,43 @@
                     created: btn.dataset.created || ''
                 };
 
-                // 2. Load PDF template
                 const templateBytes = await fetchTemplateBytes();
                 const pdfDoc = await PDFLib.PDFDocument.load(templateBytes);
 
-                // 3. Register fontkit (required for custom TTF)
                 pdfDoc.registerFontkit(window.fontkit);
 
-                // 4. Load and embed Lao font
-                const fontBytes = await fetch('/assets/fonts/phetsarath ot.ttf')
-                    .then(res => res.arrayBuffer());
+                const fontBytes = await fetch('/assets/fonts/phetsarath ot.ttf').then(res => res.arrayBuffer());
                 const laoFont = await pdfDoc.embedFont(fontBytes);
 
-                // 5. Get first page and its size
                 const pages = pdfDoc.getPages();
                 const firstPage = pages[0];
                 const { width, height } = firstPage.getSize();
 
-                // 6. Draw all text using laoFont
-                firstPage.drawText(String(data.id), { x: 340, y: height - 165, size: 12, font: laoFont, color: PDFLib.rgb(0, 0, 0) });
-                  firstPage.drawText(String(data.id), { x: 480, y: height - 115, size: 12, font: laoFont, color: PDFLib.rgb(0, 0, 0) });
-                // firstPage.drawText(String(data.vault), { x: 120, y: height - 165, size: 11, font: laoFont });
-                firstPage.drawText(String(data.user), { x: 140, y: height - 298, size: 11, font: laoFont });
-                firstPage.drawText(String(data.amount), { x: 170, y: height - 440, size: 12, font: laoFont });
-                firstPage.drawText(String(data.amount_in_words), { x: 190, y: height - 485, size: 12, maxWidth: 300,  font: laoFont });
-                firstPage.drawText(String(data.purpose), { x: 180, y: height - 390, size: 11, maxWidth: 300,letterSpacing: 0, lineHeight: 13, wordBreak: true, font: laoFont });
-                firstPage.drawText(String(data.created), { x: 480, y: height - 139, size: 11, font: laoFont });
+                // Draw main info
+                firstPage.drawText(data.id, { x: 340, y: height - 165, size: 12, font: laoFont });
+                firstPage.drawText(data.user, { x: 140, y: height - 298, size: 11, font: laoFont });
+                firstPage.drawText(data.amount, { x: 170, y: height - 440, size: 12, font: laoFont });
+                firstPage.drawText(data.amount_in_words, { x: 190, y: height - 485, size: 12, maxWidth: 300, font: laoFont });
+                firstPage.drawText(data.purpose, { x: 180, y: height - 390, size: 11, maxWidth: 300, font: laoFont });
+                firstPage.drawText(data.created, { x: 480, y: height - 139, size: 11, font: laoFont });
 
-                // 7. Save PDF and show in iframe
+                // Draw denomination table
+                const denominations = getDenominations();
+                let startX = 360;
+                let startY = height - 298;
+                const lineHeight = 33;
+                denominations.forEach((row, i) => {
+                    firstPage.drawText(row.denom, { x: startX, y: startY - i*lineHeight, size: 11, font: laoFont });
+                    firstPage.drawText(row.quantity, { x: startX + 150, y: startY - i*lineHeight, size: 11, font: laoFont });
+                });
+
                 const pdfBytes = await pdfDoc.save();
                 const blob = new Blob([pdfBytes], { type: 'application/pdf' });
 
-                if (currentObjectUrl) {
-                    URL.revokeObjectURL(currentObjectUrl);
-                    currentObjectUrl = null;
-                }
+                if (currentObjectUrl) URL.revokeObjectURL(currentObjectUrl);
                 currentObjectUrl = URL.createObjectURL(blob);
                 iframe.src = currentObjectUrl;
 
-                // 8. Open modal
                 modal.classList.remove('hidden');
                 modal.classList.add('flex');
 
@@ -227,21 +214,14 @@
         });
     });
 
-    // Close modal button
     closeBtn.addEventListener('click', () => {
         modal.classList.add('hidden');
         modal.classList.remove('flex');
-        if (currentObjectUrl) {
-            URL.revokeObjectURL(currentObjectUrl);
-            currentObjectUrl = null;
-        }
+        if (currentObjectUrl) URL.revokeObjectURL(currentObjectUrl);
         iframe.src = '';
     });
 
-    // Close modal if clicking outside content
-    modal.addEventListener('click', (e) => {
-        if (e.target === modal) closeBtn.click();
-    });
+    modal.addEventListener('click', e => { if (e.target === modal) closeBtn.click(); });
 });
-    </script>
-@endsection
+</script>
+@endsection 

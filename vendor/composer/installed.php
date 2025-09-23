@@ -484,6 +484,15 @@
             'aliases' => array(),
             'dev_requirement' => false,
         ),
+        'laravel/telescope' => array(
+            'pretty_version' => 'v5.11.4',
+            'version' => '5.11.4.0',
+            'reference' => '8b7bd77857d6b1b8c9362560cde74911cee68ab8',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../laravel/telescope',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
         'laravel/tinker' => array(
             'pretty_version' => 'v2.10.1',
             'version' => '2.10.1.0',

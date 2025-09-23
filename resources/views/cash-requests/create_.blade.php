@@ -35,19 +35,19 @@
         .btn-primary {
             @apply bg-[var(--primary-color)] hover:bg-[var(--accent-color)] text-white px-6 py-3 rounded-lg font-medium transition-colors;
         }
-        
+
         .btn-secondary {
             @apply bg-white hover:bg-gray-50 text-[var(--text-primary)] border border-[var(--border-color)] px-6 py-3 rounded-lg font-medium transition-colors;
         }
-        
+
         .card {
             @apply bg-white rounded-lg shadow-sm border border-[var(--border-color)] p-6;
         }
-        
+
         .stat-card {
             @apply bg-white rounded-lg shadow-sm border border-[var(--border-color)] p-6 hover:shadow-md transition-shadow;
         }
-        
+
         .input-field {
             @apply w-full px-4 py-3 border border-[var(--border-color)] rounded-lg focus:ring-2 focus:ring-[var(--primary-color)] focus:border-transparent;
         }
