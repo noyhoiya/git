@@ -15,6 +15,7 @@ class CashRequest extends Model
     public $timestamps = false;
 
     protected $fillable = [
+        'type',
         'requester_vault_id',
         'requester_user_id',
         'amount_cents',
@@ -65,7 +66,7 @@ public function denominations()
 
     public function getAmountAttribute()
     {
-        return $this->amount_cents / 100;
+        return $this->amount_cents;
     }
 
     public function setAmountAttribute($value)

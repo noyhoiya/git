@@ -72,7 +72,7 @@ public function store(Request $request)
     $cashRequest = CashRequest::create([
         'requester_vault_id' => $validated['requester_vault_id'],
         'requester_user_id' => auth()->id(),
-        'amount_cents' => $validated['amount'] * 100,
+        'amount_cents' => $validated['amount'],
         'amount_in_words' => $validated['amount_in_words'],
         'purpose_code' => $validated['purpose_code'],
         'purpose_text' => $validated['purpose_text'] ?? null,

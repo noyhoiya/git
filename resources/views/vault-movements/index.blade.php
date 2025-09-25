@@ -27,7 +27,7 @@
         --text-primary: #111827;
         --text-secondary: #6b7280;
         --border-color: #e5e7eb;
-        --background-light: #f9fafb;
+        --background-light: #f9faf0;
         --success-color: #10b981;
         --warning-color: #f59e0b;
         --danger-color: #ef4444;
@@ -139,7 +139,7 @@
                     <td class="px-4 py-2 text-sm text-gray-700">{{ $movement->movement_id }}</td>
                     <td class="px-4 py-2 text-sm text-gray-700">{{ $movement->fromVault->vault_name ?? '-' }}</td>
                     <td class="px-4 py-2 text-sm text-gray-700">{{ $movement->toVault->vault_name ?? '-' }}</td>
-                    
+
                     <td class="px-4 py-2 text-sm text-gray-700">
                         ₭{{ number_format($movement->amount_cents , 2, '.', ',') }}
                     </td>
@@ -158,9 +158,9 @@
                     <td class="px-4 py-2 text-sm text-gray-500">{{ $movement->created_at->format('Y-m-d H:i') }}</td>
                     <td class="px-4 py-2 text-sm space-x-2">
                         @if($movement->status === 'DRAFT' && in_array(auth()->user()->role_id, [1,3,5]))
-                            <button 
-                                type="button" 
-                                class="bg-blue-300 hover:bg-yellow-300 text-white px-3 py-1 rounded transition-all text-sm preview-btn" 
+                            <button
+                                type="button"
+                                class="bg-blue-300 hover:bg-yellow-300 text-white px-3 py-1 rounded transition-all text-sm preview-btn"
                                 data-id="{{ $movement->movement_id }}"
                                 data-from="{{ $movement->fromVault->vault_name ?? '-' }}"
                                 data-to="{{ $movement->toVault->vault_name ?? '-' }}"
@@ -178,7 +178,7 @@
                                 @csrf
                                 <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded transition-all text-sm">ບັນທຶກ</button>
                             </form>
-                            
+
                             <!-- Delete button -->
                             <form action="{{ route('vault-movements.destroy', $movement->movement_id) }}" method="POST" class="inline"
                                 onsubmit="return confirm('Are you sure you want to delete this movement?');">
@@ -215,23 +215,23 @@
 
         <!-- Action Buttons (not exported) -->
         <div class="absolute top-2 right-2 flex gap-2 z-50">
-            <button id="closePreview" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm shadow">&times;</button>
             <button id="printPreview" class="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded text-sm shadow">ພິມ</button>
             <button id="exportPDF" class="bg-gray-700 hover:bg-gray-800 text-white px-3 py-1 rounded text-sm shadow">PDF</button>
-            <button id="exportWord" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm shadow">Word</button>
-            <button id="exportExcel" class="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded text-sm shadow">Excel</button>
+            <button id="closePreview" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm shadow">&times;</button>
+            {{-- <button id="exportWord" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm shadow">Word</button> --}}
+            {{-- <button id="exportExcel" class="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded text-sm shadow">Excel</button> --}}
         </div>
 
         <!-- Export Content -->
         <div id="exportContent" class="flex-1 relative p-6 flex flex-col">
 
             <!-- Watermark -->
-            <img src="{{ asset('assets/image/logo.png') }}" 
-                 class="absolute bottom-2 left-1/2 -translate-x-1/2 w-full h-auto opacity-10 pointer-events-none select-none"
+            <img src="{{ asset('assets/image/logo.png') }}"
+                 class="absolute bottom-20 left-1/2 -translate-x-1/2 w-80% h-auto opacity-15 pointer-events-none select-none"
                  alt="Watermark">
 
             <!-- Header -->
-            <div class="text-center mb-4 z-10">
+            <br><div class="text-center mb-4 z-10">
                 <h2 class="text-sm lao-font">
                     ສາທາລະນະລັດ ປະຊາທິປະໄຕ ປະຊາຊົນລາວ<br>
                     ສັນຕິພາບ ເອກະລາດ ປະຊາທິປະໄຕ ເອກະພາບ ວັດທະນາຖາວອນ<br>
@@ -261,8 +261,8 @@
             <div class="flex gap-6 lao-font mb-4">
 
                 <!-- Left Box -->
-                <div class="border border-gray-400 p-5 bg-white w-2/3 text-left text-sm flex-1">
-                    <div class="grid grid-cols-1 gap-3">
+                <div class="border border-gray-400 p-5 bg-white w-2/3 text-left text-sm flex-1 justify-center ">
+                    <div class="grid grid-cols-1 gap-10">
                         <p><span class="mr-2 font-bold">•</span>ຊື່ຜູ້ຖອນ:... <span id="preview-created-by"></span></p>
                         <p><span class="mr-2 font-bold">•</span>ສັງກັດຢູ່ພະແນກ:... <span></span></p>
                         <p><span class="mr-2 font-bold">•</span>ຈຸດປະສົງຂອງການຖອນ:... <span id="preview-purpose"></span></p>
@@ -271,30 +271,30 @@
                     </div>
                 </div>
 
-                <!-- Right Table -->
-                <div class="overflow-x-auto w-2/3 flex-1">
-                    <table class="w-full border border-gray-400 text-sm">
-                        <thead>
-                            <tr class="bg-yellow-200 text-center font-bold">
-                                <th class="border border-black" colspan="2">ລາຍລະອຽດ / Detail’s</th>
-                            </tr>
-                            <tr class="text-center">
-                                <th class="bg-green-200 border border-black px-3 py-2">ປະເພດໃບ</th>
-                                <th class="bg-orange-100 border border-black px-3 py-2">ຈຳນວນເງິນ</th>
-                            </tr>
-                        </thead>
-                        <tbody id="preview-details" class="text-center">
-                            <tr><td class="border border-black px-3 py-2">100,000</td><td class="border border-black px-3 py-2"></td></tr>
-                            <tr><td class="border border-black px-3 py-2">50,000</td><td class="border border-black px-3 py-2"></td></tr>
-                        </tbody>
-                        <tfoot>
-                            <tr>
-                                <td class="border px-2 py-1 font-bold text-right">ລວມ/Total:</td>
-                                <td class="border px-2 py-1" id="preview-total"></td>
-                            </tr>
-                        </tfoot>
-                    </table>
-                </div>
+                                <!-- Right Table (smaller width) -->
+            <div class="overflow-x-auto w-1/3 flex-3  ">
+                <table class="w-full table-auto border border-gray-400 text-sm  ">
+                    <thead>
+                        <tr class="bg-yellow-200 text-center font-bold ">
+                            <th class="border border-black px-2 py-3" colspan="2">ລາຍລະອຽດ / Detail’s</th>
+                        </tr>
+                        <tr class="text-center">
+                            <th class="bg-green-200 border border-black px-2 py-3 whitespace-nowrap">ປະເພດໃບ</th>
+                            <th class="bg-orange-100 border border-black px-2 py-3 whitespace-nowrap">ຈຳນວນເງິນ</th>
+                        </tr>
+                    </thead>
+                    <tbody id="preview-details" class="text-center [&>tr]:h-9">
+                        <!-- JS will populate rows here -->
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td class="border px-2 py-2 font-bold text-right">ລວມ/Total:</td>
+                            <td class="border px-2 py-2 text-right" id="preview-total" >0</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+
             </div>
 
             <!-- Signatures -->
@@ -345,11 +345,30 @@
     display: flex;
     flex-direction: column;
 }
+@@media print {
+    /* Hide buttons and input boxes */
+    #previewModal button,
+    #previewModal .qty-btn,
+    #previewModal input[type="number"] {
+        display: none !important;
+    }
+
+    /* Make table look clean */
+    #previewModal table, 
+    #previewModal table th, 
+    /* #previewModal table td {
+        background-color: transparent !important;
+        color: none !important;
+        border-color: none !important;
+    } */
+}
+
 
 </style>
 
 
 <script>
+    let originalAmount = 0;
    document.getElementById('printPreview').addEventListener('click', function () {
     const modal = document.getElementById('previewModal');
     const originalContent = document.body.innerHTML;
@@ -374,39 +393,38 @@
 document.addEventListener('DOMContentLoaded', function() {
     const modal = document.getElementById('previewModal');
     const closeBtn = document.getElementById('closePreview');
-    function openPreview(data) {
-        // Basic info
-        document.getElementById('preview-id').textContent = data.id || '-';
-        document.getElementById('preview-from').textContent = data.from || '-';
-        document.getElementById('preview-to').textContent = data.to || '-';
-        document.getElementById('preview-amount').textContent = data.amount || '-';
-        document.getElementById('preview-amount-words').textContent = data.amount_in_words || '-';
+   function openPreview(data){
+    const modal = document.getElementById('previewModal');
+    originalAmount = Number(data.amount.replace(/,/g,'')) || 0;
+    document.getElementById('preview-id').textContent = data.id;
+    document.getElementById('preview-from').textContent = data.from;
+    document.getElementById('preview-to').textContent = data.to;
+    document.getElementById('preview-amount').textContent = data.amount;
+    document.getElementById('preview-amount-words').textContent = data.amount_in_words;
+    document.getElementById('preview-created').textContent = data.created;
+    document.getElementById('preview-purpose').textContent = data.purpose;
+    document.getElementById('preview-created-by').textContent = data.created_by;
 
-        document.getElementById('preview-created').textContent = data.created || '-';
-        document.getElementById('preview-purpose').textContent = data.purpose || '-';
-        document.getElementById('preview-created-by').textContent = data.created_by || '-';
+    const tbody = document.getElementById('preview-details');
+    tbody.innerHTML = '';
+    const denominations = [100000,50000,20000,10000,5000,1000,500];
+    denominations.forEach(denom=>{
+        const item = (data.details||[]).find(d=>Number(d.denomination)===denom);
+        const qty = item? Number(item.quantity):0;
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td class="border px-2 py-1">${denom.toLocaleString()}</td>
+            <td class="border px-2 py-1 flex justify-center items-center gap-2">
+                <button class="qty-btn" data-action="decrease">-</button>
+                <input type="number" value="${qty}" min="0" class="w-14 text-center border rounded"/>
+                <button class="qty-btn" data-action="increase">+</button>
+            </td>`;
+        tbody.appendChild(tr);
+    });
 
-       const detailsTbody = document.getElementById('preview-details');
-detailsTbody.innerHTML = ''; // clear old rows
-let total = 0;
-
-(data.details || []).forEach(item => {
-    const lineTotal = Number(item.denomination) * Number(item.quantity);
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-        <td class="border border-black px-3 py-2">${Number(item.denomination).toLocaleString()}</td>
-        <td class="border border-black px-3 py-2 text-right">${Number(item.quantity).toLocaleString()}</td>
-    `;
-    detailsTbody.appendChild(tr);
-    total += lineTotal;
-});
-
-document.getElementById('preview-total').textContent = `₭${total.toLocaleString()}`;
-
-
-        modal.classList.remove('hidden');
-        modal.classList.add('flex');
-    }
+    updateDenomTotal();
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+}
 
     // Preview button click
     document.querySelectorAll('.preview-btn').forEach(btn => {
@@ -442,11 +460,82 @@ document.getElementById('preview-total').textContent = `₭${total.toLocaleStrin
         }
     });
 });
+// Quantity button click handling
+document.getElementById('preview-details').addEventListener('click', function(e) {
+    if (e.target.classList.contains('qty-btn')) {
+        const input = e.target.parentElement.querySelector('input');
+        let value = Number(input.value);
+        if (e.target.dataset.action === 'increase') value++;
+        if (e.target.dataset.action === 'decrease' && value > 0) value--;
+        input.value = value;
+        updateDenomTotal();
+    }
+});
+
+document.getElementById('preview-details').addEventListener('input', function(e) {
+    if (e.target.tagName === 'INPUT') {
+        if (Number(e.target.value) < 0) e.target.value = 0;
+        updateDenomTotal();
+    }
+});
+
+
+
+// Recalculate total function
+function updateDenomTotal() {
+    let total = 0;
+    const rows = document.querySelectorAll('#preview-details tr');
+
+    rows.forEach(row => {
+        const denom = Number(row.cells[0].textContent.replace(/,/g, ''));
+        const input = row.querySelector('input');
+        let qty = input ? Number(input.value) : 0;
+        let lineTotal = denom * qty;
+
+        // Check if adding this line exceeds original amount
+        if (total + lineTotal > originalAmount) {
+            qty = Math.floor((originalAmount - total) / denom);
+            lineTotal = denom * qty;
+            if (input) input.value = qty; // update input
+        }
+
+        total += lineTotal;
+    });
+
+    document.getElementById('preview-total').textContent = `₭${total.toLocaleString()}`;
+}
+
+
 // for export
+function prepareForExport() {
+    const rows = document.querySelectorAll('#preview-details tr');
+    rows.forEach(row => {
+        const input = row.querySelector('input[type="number"]');
+        if (input) {
+            // Replace input with span showing the value
+            const span = document.createElement('span');
+            span.textContent = input.value;
+            span.style.display = 'inline-block';
+            span.style.textAlign = 'center';
+            input.parentElement.replaceChild(span, input);
+        }
+
+        // Remove +/- buttons
+        row.querySelectorAll('.qty-btn').forEach(btn => btn.remove());
+    });
+}
+
+// After export, reload modal to restore inputs
+function restoreModal() {
+    location.reload();
+}
+
 // Export PDF
 document.getElementById('exportPDF').addEventListener('click', async () => {
+    prepareForExport();
+
     const { jsPDF } = window.jspdf;
-    const content = document.getElementById('exportContent'); // Only export this
+    const content = document.getElementById('exportContent');
     const canvas = await html2canvas(content, { scale: 2 });
     const imgData = canvas.toDataURL('image/png');
 
@@ -457,22 +546,39 @@ document.getElementById('exportPDF').addEventListener('click', async () => {
 
     pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
     pdf.save(`VaultMovement_${document.getElementById('preview-id').textContent}.pdf`);
+
+    restoreModal();
 });
 
 // Export Word
 document.getElementById('exportWord').addEventListener('click', () => {
-    const content = document.getElementById('exportContent').innerHTML; // Only export this
+    prepareForExport();
+
+    const content = document.getElementById('exportContent').innerHTML;
     const blob = new Blob(['<html><head><meta charset="UTF-8"></head><body>' + content + '</body></html>'], {
         type: 'application/msword'
     });
     saveAs(blob, `VaultMovement_${document.getElementById('preview-id').textContent}.doc`);
+
+    restoreModal();
 });
 
 // Export Excel
 document.getElementById('exportExcel').addEventListener('click', () => {
-    const table = document.querySelector('#exportContent #preview-details'); // Only table inside wrapper
+    prepareForExport();
+
+    const table = document.querySelector('#exportContent #preview-details');
     const wb = XLSX.utils.table_to_book(table, { sheet: 'Sheet1' });
     XLSX.writeFile(wb, `VaultMovement_${document.getElementById('preview-id').textContent}.xlsx`);
+
+    restoreModal();
+});
+
+// Print
+document.getElementById('printPreview').addEventListener('click', function () {
+    prepareForExport();
+    window.print();
+    restoreModal();
 });
 
 </script>

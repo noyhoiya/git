@@ -87,21 +87,54 @@
                         <td class="px-4 py-2 border"><?php echo e($cashRequest->purpose->purpose_name ?? $cashRequest->purpose_text); ?></td>
                         <td class="px-4 py-2 border"><?php echo e($cashRequest->status); ?></td>
                         <td class="px-4 py-2 border"><?php echo e($cashRequest->created_at->format('Y-m-d H:i')); ?></td>
-                        <td class="px-2 py-2 border text-center flex justify-center items-center space-x-1">
-                            <button
-                                class="preview-btn bg-gray-500 hover:bg-blue-600 text-white p-2 rounded-full"
-                                data-id="<?php echo e($cashRequest->request_id); ?>"
-                                data-vault="<?php echo e($cashRequest->requesterVault->vault_name ?? '-'); ?>"
-                                data-user="<?php echo e($cashRequest->requesterUser->full_name ?? '-'); ?>"
-                                data-amount="<?php echo e(number_format($cashRequest->amount, 2)); ?> ₭"
-                                data-amount_in_words="<?php echo e($cashRequest->amount_in_words ?? '-'); ?>"
-                                data-purpose="<?php echo e($cashRequest->purpose->purpose_name ?? $cashRequest->purpose_text); ?>"
-                                data-created="<?php echo e($cashRequest->created_at->format('d/m/Y H:i')); ?>"
-                                title="Preview PDF"
-                            >
-                                <i data-lucide="eye" class="w-4 h-4"></i>
-                            </button>
-                        </td>
+                       <td class="px-2 py-2 border text-center flex justify-center items-center space-x-1">
+                                        
+                                        <button
+                                            class="preview-btn bg-gray-500 hover:bg-blue-600 text-white p-2 rounded-full justify-center items-center "
+                                            data-id="<?php echo e($cashRequest->request_id); ?>"
+                                            data-vault="<?php echo e($cashRequest->requesterVault->vault_name ?? '-'); ?>"
+                                            data-user="<?php echo e($cashRequest->requesterUser->full_name ?? '-'); ?>"
+                                            data-amount="<?php echo e(number_format($cashRequest->amount, 2)); ?> ₭"
+                                            data-amount_in_words="<?php echo e($cashRequest->amount_in_words ?? '-'); ?>"
+                                            data-purpose="<?php echo e($cashRequest->purpose->purpose_name ?? $cashRequest->purpose_text); ?>"
+                                            data-created="<?php echo e($cashRequest->created_at->format('d/m/Y H:i')); ?>"
+                                            title="Preview PDF"
+                                        >
+                                            <i data-lucide="eye" class="w-4 h-4"></i>
+                                        </button>
+
+                                        
+                                        <?php if($cashRequest->status === 'PENDING'): ?>
+                                            <div class="flex justify-center items-center gap-2">
+                                                <form action="<?php echo e(route('cash-requests.approve', $cashRequest->request_id)); ?>" method="POST">
+                                                    <?php echo csrf_field(); ?>
+                                                    <button type="submit" class="bg-green-500 hover:bg-green-600 text-white p-2 rounded-full" title="Approve">
+                                                        <i data-lucide="check" class="w-4 h-4"></i>
+                                                    </button>
+                                                </form>
+
+                                                <form action="<?php echo e(route('cash-requests.reject', $cashRequest->request_id)); ?>" method="POST" 
+                                                    onsubmit="return confirm('ທ່ານຕ້ອງການປະຕິເສດເວີນີ້ບໍ?');">
+                                                    <?php echo csrf_field(); ?>
+                                                    <button type="submit" class="bg-red-500 hover:bg-red-600 text-white p-2 rounded-full" title="Reject">
+                                                        <i data-lucide="x" class="w-4 h-4"></i>
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        <?php else: ?>
+                                            
+                                            <span class="px-2 py-1 text-sm font-semibold text-gray-700">
+                                                <?php if($cashRequest->status === 'APPROVED'): ?>
+                                                    ອະນຸມັດ ໂດຍ: <?php echo e($cashRequest->approverUser->full_name ?? '-'); ?>
+
+                                                <?php elseif($cashRequest->status === 'REJECTED'): ?>
+                                                        
+                                                        <i data-lucide="x" class="w-5 h-5 text-red-600" title="Rejected"></i>
+
+                                                <?php endif; ?>
+                                            </span>
+                                        <?php endif; ?>
+                                    </td>
                     </tr>
                 <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
             </tbody>
