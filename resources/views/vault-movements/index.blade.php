@@ -354,8 +354,8 @@
     }
 
     /* Make table look clean */
-    #previewModal table, 
-    #previewModal table th, 
+    #previewModal table,
+    #previewModal table th,
     /* #previewModal table td {
         background-color: transparent !important;
         color: none !important;

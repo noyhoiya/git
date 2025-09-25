@@ -256,6 +256,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     modal.addEventListener('click', e => { if (e.target === modal) closeBtn.click(); });
 });
+
 </script>
 <?php $__env->stopSection(); ?> 
 <?php echo $__env->make('layouts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\xampp\htdocs\cash_center_v3\resources\views/cash-requests/index.blade.php ENDPATH**/ ?>

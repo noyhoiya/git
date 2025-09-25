@@ -255,5 +255,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
     modal.addEventListener('click', e => { if (e.target === modal) closeBtn.click(); });
 });
+
 </script>
 @endsection 

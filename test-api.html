@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cash Center API Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        button { padding: 10px 20px; margin: 10px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        #result { background: #f8f9fa; padding: 15px; margin: 10px 0; border-radius: 5px; white-space: pre-wrap; }
+        .success { color: green; }
+        .error { color: red; }
+    </style>
+</head>
+<body>
+    <h1>🏦 Cash Center API Test</h1>
+    
+    <div>
+        <button onclick="testLogin()">🔐 Test Login</button>
+        <button onclick="testDashboard()">📊 Test Dashboard</button>
+        <button onclick="testCashRequests()">💰 Test Cash Requests</button>
+        <button onclick="testVaults()">🏛️ Test Vaults</button>
+    </div>
+    
+    <div id="result">Click a button above to test the API...</div>
+
+    <script>
+        let token = '';
+        const API_BASE = 'http://127.0.0.1:8000/api';
+
+        async function testLogin() {
+            try {
+                showResult('🔄 Testing login...', 'info');
+                
+                const response = await fetch(`${API_BASE}/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        username: 'admin',
+                        password: 'password'
+                    })
+                });
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    showResult('❌ Server Error: ' + response.status + '\n' + errorText, 'error');
+                    return;
+                }
+                
+                const data = await response.json();
+                
+                if (data.token) {
+                    token = data.token;
+                    showResult('✅ Login successful!\n\n' + JSON.stringify(data, null, 2), 'success');
+                } else {
+                    showResult('❌ Login failed:\n' + JSON.stringify(data, null, 2), 'error');
+                }
+            } catch (error) {
+                showResult('❌ Error: ' + error.message, 'error');
+            }
+        }
+
+        async function testDashboard() {
+            if (!token) {
+                showResult('❌ Please login first!', 'error');
+                return;
+            }
+            
+            try {
+                showResult('🔄 Testing dashboard...', 'info');
+                
+                const response = await fetch(`${API_BASE}/dashboard/stats`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Accept': 'application/json'
+                    }
+                });
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    showResult('❌ Server Error: ' + response.status + '\n' + errorText, 'error');
+                    return;
+                }
+                
+                const data = await response.json();
+                showResult('✅ Dashboard stats:\n\n' + JSON.stringify(data, null, 2), 'success');
+            } catch (error) {
+                showResult('❌ Error: ' + error.message, 'error');
+            }
+        }
+
+        async function testCashRequests() {
+            if (!token) {
+                showResult('❌ Please login first!', 'error');
+                return;
+            }
+            
+            try {
+                showResult('🔄 Testing cash requests...', 'info');
+                
+                const response = await fetch(`${API_BASE}/cash-requests`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Accept': 'application/json'
+                    }
+                });
+                
+                const data = await response.json();
+                showResult('✅ Cash requests:\n\n' + JSON.stringify(data, null, 2), 'success');
+            } catch (error) {
+                showResult('❌ Error: ' + error.message, 'error');
+            }
+        }
+
+        async function testVaults() {
+            if (!token) {
+                showResult('❌ Please login first!', 'error');
+                return;
+            }
+            
+            try {
+                showResult('🔄 Testing vaults...', 'info');
+                
+                const response = await fetch(`${API_BASE}/vaults`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Accept': 'application/json'
+                    }
+                });
+                
+                const data = await response.json();
+                showResult('✅ Vaults:\n\n' + JSON.stringify(data, null, 2), 'success');
+            } catch (error) {
+                showResult('❌ Error: ' + error.message, 'error');
+            }
+        }
+
+        function showResult(message, type) {
+            const result = document.getElementById('result');
+            result.textContent = message;
+            result.className = type;
+        }
+    </script>
+</body>
+</html>
