@@ -6,38 +6,12 @@
     <title><?php echo $__env->yieldContent('title', 'ຄັງເງິນສົດ'); ?></title>
     <meta name="description" content="ລະບົບຄັງເງິນສົດ">
     <meta name="csrf-token" content="<?php echo e(csrf_token()); ?>">
-    
-    <link href="https://cdn.tailwindcss.com/3.3.2/tailwind.min.css" rel="stylesheet">
+    <?php echo app('Illuminate\Foundation\Vite')(['resources/css/app.css', 'resources/js/app.jsx']); ?>
+    <!-- <link href="https://cdn.tailwindcss.com/3.3.2/tailwind.min.css" rel="stylesheet"> -->
     <link href="<?php echo e(asset('css/report.css')); ?>" rel="stylesheet">
     <link href="https://resource.trickle.so/vendor_lib/unpkg/lucide-static@0.516.0/font/lucide.css" rel="stylesheet">
     <link href="https://unpkg.com/lucide-static@0.516.0/font/lucide.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/lucide/dist/lucide.min.js"></script>
-
-    
-    <style>
-        :root {
-            --primary-color: #10b981;
-            --secondary-color: #f0fdf4;
-            --accent-color: #059669;
-            --text-primary: #111827;
-            --text-secondary: #6b7280;
-            --border-color: #e5e7eb;
-            --background-light: #f9fafb;
-        }
-
-        /* Page transition base */
-        body {
-            opacity: 0;
-            transform: translateY(20px);
-            transition: opacity 0.2s ease, transform 0.2ss ease;
-        }
-
-        body.page-active {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-    </style>
 </head>
 <body class="bg-gray-50">
     <nav class="bg-white shadow-sm border-b">
@@ -166,9 +140,10 @@
                                 ອອກຈາກລະບົບ
                             </button>
                                                     
-
-                        </form>
                             
+                        </form>
+                        <button id="themeToggle" class="btn-primary mb-2 rounded-full">🌙</button>
+
                     <?php endif; ?>
 
                                    
@@ -177,6 +152,7 @@
             </div>
         </div>
         
+
     </nav>
 
     <main class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
@@ -335,9 +311,132 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
-</script>
-<script>
+
   lucide.createIcons(); // initialize all icons
+  // dark mode toggle
+  (function(){
+  console.clear();
+  console.log('[theme-debug] init —', new Date().toLocaleString());
+
+  function debugInfo() {
+    console.log('[theme-debug] document.readyState:', document.readyState);
+    console.log('[theme-debug] html.classList:', document.documentElement.className);
+    console.log('[theme-debug] localStorage.theme:', (()=>{try{return localStorage.getItem('theme')}catch(e){return 'localStorage unavailable'}})());
+  }
+
+  function makeButtonClickable(btn) {
+    if(!btn) return;
+    btn.style.cursor = 'pointer';
+    btn.style.userSelect = 'none';
+    // Ensure clickable if something overlaps
+    if (!btn.style.zIndex || parseInt(btn.style.zIndex) < 50) {
+      btn.style.zIndex = 9999;
+      btn.style.position = btn.style.position || 'relative';
+    }
+    // Avoid pointer disabled
+    try { btn.style.pointerEvents = 'auto'; } catch(e){}
+  }
+
+  function updateIcon(btn) {
+    if(!btn) return;
+    try {
+      btn.setAttribute('aria-pressed', document.documentElement.classList.contains('dark') ? 'true' : 'false');
+      // keep icon only — do not modify other inner HTML if your button has complex children
+      if(btn.dataset.simpleIcon === 'true' || btn.innerText.trim().length <= 2) {
+        btn.innerText = document.documentElement.classList.contains('dark') ? '☀️' : '🌙';
+      }
+    } catch(e) { console.warn('[theme-debug] updateIcon error', e); }
+  }
+
+  function attachHandler(btn) {
+    if(!btn) return;
+    // remove any previous duplicate handler marker
+    if(btn.__themeHandlerAttached) return;
+    btn.__themeHandlerAttached = true;
+
+    makeButtonClickable(btn);
+    updateIcon(btn);
+
+    btn.addEventListener('click', function(e){
+      try {
+        e.preventDefault();
+      } catch(err) {}
+      document.documentElement.classList.toggle('dark');
+      try { localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light'); } catch(e){}
+      updateIcon(btn);
+      console.log('[theme-debug] click -> dark=', document.documentElement.classList.contains('dark'));
+    });
+  }
+
+  // main init (immediate)
+  debugInfo();
+  const btn = document.getElementById('themeToggle');
+  if (btn) {
+    console.log('[theme-debug] themeToggle found immediately', btn);
+    // if your button contains only an emoji, mark it simple so we may replace text
+    if (btn.innerText.trim().length <= 2) btn.dataset.simpleIcon = 'true';
+    attachHandler(btn);
+  } else {
+    console.warn('[theme-debug] themeToggle NOT found yet. Will observe DOM for 3s to catch dynamic insertion.');
+    // watch for dynamic insertion (e.g. blade sections / auth / client frameworks)
+    const obs = new MutationObserver((mutations, observer) => {
+      const b = document.getElementById('themeToggle');
+      if (b) {
+        console.log('[theme-debug] themeToggle found by MutationObserver', b);
+        if (b.innerText.trim().length <= 2) b.dataset.simpleIcon = 'true';
+        attachHandler(b);
+        observer.disconnect();
+      }
+    });
+    obs.observe(document.documentElement || document.body, { childList: true, subtree: true });
+    // stop observing after 3s
+    setTimeout(() => { try{ obs.disconnect(); }catch(e){} }, 3000);
+  }
+
+  // global delegated fallback (works even if button replaced)
+  document.addEventListener('click', function(e){
+    const t = e.target.closest && e.target.closest('#themeToggle');
+    if (!t) return;
+    // If native handler already runs, this is fine — it's idempotent
+    e.preventDefault();
+    document.documentElement.classList.toggle('dark');
+    try { localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light'); } catch(e){}
+    updateIcon(t);
+    console.log('[theme-debug] delegated click -> dark=', document.documentElement.classList.contains('dark'));
+  });
+
+  // quick helper: test visual change by toggling then restoring (comment out if noisy)
+  // console.log('[theme-debug] test toggle (visual). Run manually: document.documentElement.classList.toggle("dark")');
+
+  // Useful check for overlapped element
+  setTimeout(() => {
+    const el = document.getElementById('themeToggle');
+    if (el) {
+      const cs = getComputedStyle(el);
+      console.log('[theme-debug] computed style for #themeToggle -> display:', cs.display,
+                  'pointer-events:', cs.pointerEvents, 'z-index:', cs.zIndex, 'position:', cs.position);
+      // check ancestors for pointer-events:none or overlay
+      let p = el.parentElement;
+      while (p && p !== document.body) {
+        const pcs = getComputedStyle(p);
+        if (pcs.pointerEvents === 'none') console.warn('[theme-debug] ancestor with pointer-events:none', p);
+        p = p.parentElement;
+      }
+    }
+  }, 1500);
+
+  // Final status after 1.5s
+  setTimeout(() => {
+    debugInfo();
+    console.log('[theme-debug] done initialization (1.5s). If the button still does nothing, copy console logs and paste them in the chat.');
+  }, 1500);
+
+})();
+(function () {
+  const savedTheme = localStorage.getItem("theme") || "light";
+  document.documentElement.classList.remove("light", "dark");
+  document.documentElement.classList.add(savedTheme);
+})();
 </script>
 
 <?php echo $__env->yieldContent('scripts'); ?>  <!-- <-- ต้องอยู่ตรงนี้ -->
