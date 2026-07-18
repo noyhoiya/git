@@ -11,7 +11,7 @@
         "inertiajs/inertia-laravel": "^2.0",
         "laravel/framework": "^11.0",
         "laravel/sanctum": "^4.0",
-        "laravel/telescope": "^5.11",
+        "laravel/telescope": "^5.12",
         "laravel/tinker": "^2.8",
         "maatwebsite/excel": "^1.1",
         "setasign/fpdf": "^1.8",

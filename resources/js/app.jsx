@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import './app.css';
+import "../css/app.css";
+
 
 function App() {
   const [dark, setDark] = React.useState(localStorage.getItem('theme') === 'dark');

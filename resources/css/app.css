@@ -4,7 +4,7 @@
 
 /* Theme variables */
 :root {
-  --primary-color: #10b981;
+  --primary-color: #4db18e;
   --accent-color: #059669;
   --background-light: #f9fafb;
   --text-primary: #111827;
@@ -15,7 +15,7 @@
 /* Dark mode */
 .dark {
   --primary-color: #0c271e;
-  --accent-color: #059669;
+  --accent-color: #4c8b77;
   --background-light: #1f2937;
   --text-primary: #f9fafb;
   --text-secondary: #9ca3af;
@@ -33,10 +33,10 @@
 
 @layer components {
   .btn-primary {
-    @apply bg-[var(--primary-color)] hover:bg-[var(--accent-color)] text-white px-6 py-3 rounded-lg font-medium transition-colors;
+    @apply bg-[var(--primary-color)] hover:bg-[var(--accent-color)] text-white px-6 py-3 rounded-2xl rounded-lg font-medium transition-colors;
   }
   .btn-secondary {
-    @apply bg-white hover:bg-gray-50 text-[var(--text-primary)] border border-[var(--border-color)] px-6 py-3 rounded-lg font-medium transition-colors;
+    @apply bg-white hover:bg-gray-50 text-[var(--text-primary)]  rounded-e-full border border-[var(--border-color)] px-6 py-3 rounded-lg font-medium transition-colors;
   }
   .input-field {
     @apply w-full px-4 py-3 border border-[var(--border-color)] rounded-lg focus:ring-2 focus:ring-[var(--primary-color)] focus:border-transparent transition;
@@ -105,7 +105,26 @@
         color: inherit !important;
     }
 }
+    /* Style for preview table */
+    #previewContent table {
+        border-collapse: collapse;
+        width: 100%;
+    }
 
+    #previewContent th,
+    #previewContent td {
+        border: 1px solid black; /* black border */
+        padding: 0.5rem;
+        text-align: left;
+    }
+
+    #previewContent thead {
+        background-color: #ffeb3b; /* optional light gray for header */
+    }
+
+    #previewContent tbody tr:nth-child(even) {
+        background-color: #f9f9f9; /* optional striped rows */
+    }
 /* ------------------------------
    Lao Font Helper
 --------------------------------*/

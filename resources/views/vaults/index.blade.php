@@ -138,7 +138,7 @@
                         @endif
                     </td>
                     <td class="px-6 py-4 flex gap-2">
-                        <a href="{{ route('vaults.show', $vault) }}" class="bg-gray-500 hover:bg-gray-600 text-white px-3 py-1 rounded shadow text-sm transition-colors duration-150">ເບິ່ງ</a>
+                        <a href="{{ route('vaults.show', $vault) }}" class="bg-gray-500 hover:bg-gray-600 text-white px-3 py-1 rounded shadow text-sm transition-colors duration-150">ສະແດງ</a>
                         <a href="{{ route('vaults.edit', $vault) }}" class="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded shadow text-sm transition-colors duration-150">ແກ້ໄຂ</a>
                         <form action="{{ route('vaults.destroy', $vault) }}" method="POST" onsubmit="return confirm('Are you sure?');">
                             @csrf

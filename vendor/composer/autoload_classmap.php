@@ -6,6 +6,10 @@ $vendorDir = dirname(__DIR__);
 $baseDir = dirname($vendorDir);
 
 return array(
+    'App\\Http\\Controllers\\Api\\AuthController' => $baseDir . '/app/Http/Controllers/Api/AuthController.php',
+    'App\\Http\\Controllers\\Api\\CashRequestController' => $baseDir . '/app/Http/Controllers/Api/CashRequestController.php',
+    'App\\Http\\Controllers\\Api\\DashboardController' => $baseDir . '/app/Http/Controllers/Api/DashboardController.php',
+    'App\\Http\\Controllers\\Api\\VaultMovementController' => $baseDir . '/app/Http/Controllers/Api/VaultMovementController.php',
     'App\\Http\\Controllers\\AuthController' => $baseDir . '/app/Http/Controllers/AuthController.php',
     'App\\Http\\Controllers\\Auth\\AuthenticatedSessionController' => $baseDir . '/app/Http/Controllers/Auth/AuthenticatedSessionController.php',
     'App\\Http\\Controllers\\Auth\\ConfirmablePasswordController' => $baseDir . '/app/Http/Controllers/Auth/ConfirmablePasswordController.php',

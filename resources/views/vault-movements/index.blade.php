@@ -76,7 +76,7 @@
                         @if($movement->status === 'DRAFT' && in_array(auth()->user()->role_id, [1,3,5]))
                             <button
                                 type="button"
-                                class="bg-blue-300 hover:bg-yellow-300 text-white px-3 py-1 rounded transition-all text-sm preview-btn"
+                                class="bg-blue-300 hover:bg-yellow-300 rounded-2xl  text-white px-3 py-1 rounded transition-all text-sm preview-btn"
                                 data-id="{{ $movement->movement_id }}"
                                 data-from="{{ $movement->fromVault->vault_name ?? '-' }}"
                                 data-to="{{ $movement->toVault->vault_name ?? '-' }}"
@@ -87,12 +87,12 @@
                                 data-created_by="{{ $movement->createdByUser->full_name ?? '-' }}"
                                 data-details='@json($movement->details ?? [])'
                             >
-                                ເບິ່ງ
+                                ສະແດງ
                             </button>
 
                             <form action="{{ route('vault-movements.postMovement', $movement->movement_id) }}" method="POST" class="inline">
                                 @csrf
-                                <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded transition-all text-sm">ບັນທຶກ</button>
+                                <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded-2xl rounded transition-all text-sm">ບັນທຶກ</button>
                             </form>
 
                             <!-- Delete button -->
@@ -100,7 +100,7 @@
                                 onsubmit="return confirm('Are you sure you want to delete this movement?');">
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded transition-all text-sm">
+                                <button type="submit" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-2xl rounded transition-all text-sm">
                                     ລຶບ
                                 </button>
                             </form>

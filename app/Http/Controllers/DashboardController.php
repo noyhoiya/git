@@ -40,36 +40,57 @@ class DashboardController extends Controller
 
 
 
-    public function reports()
-    {
-        return view('reports.reports'); // resources/views/reports/reports.blade.php
-    }
+   public function reports()
+{
+    $users = User::orderBy('full_name')->get();
+    return view('reports.reports', compact('users'));
+}
+
 
     // Return JSON for JS fetch
-     public function cashFlowReport(Request $request)
-    {
-        $period = $request->get('period', '7days');
+    public function cashFlowReport(Request $request)
+{
+    $userId = $request->get('user_id');
+    $period = $request->get('period', '7days');
 
-        $query = VaultMovement::with(['fromVault', 'toVault', 'purpose','createdByUser']);
+    $from = now()->subDays(7);
+    $to = now();
 
-        // filter by period
-        if ($period === '7days') {
-            $query->where('created_at', '>=', now()->subDays(7));
-        } elseif ($period === '30days') {
-            $query->where('created_at', '>=', now()->subDays(30));
-        } elseif ($period === 'custom') {
-            $from = $request->get('from');
-            $to = $request->get('to');
-            if ($from && $to) {
-                $query->whereBetween('created_at', [$from, $to]);
-            }
-        }
-
-        $data = $query->orderBy('created_at', 'desc')->get();
-
-        return response()->json($data);
+    if ($period === '30days') {
+        $from = now()->subDays(30);
+    } elseif ($period === 'custom' && $request->from && $request->to) {
+        $from = Carbon::parse($request->from)->startOfDay();
+        $to = Carbon::parse($request->to)->endOfDay();
     }
 
+    // Previous total before 'from' date
+    $previousWithdrawals = VaultMovement::when($userId && $userId !== 'all', function($q) use ($userId){
+            $q->where('created_by', $userId);
+        })
+        ->where('created_at', '<', $from)
+        ->where('type', 'WITHDRAWAL')
+        ->sum('amount_cents');
 
+    $previousHandovers = VaultMovement::when($userId && $userId !== 'all', function($q) use ($userId){
+            $q->where('created_by', $userId);
+        })
+        ->where('created_at', '<', $from)
+        ->where('type', 'HANDOVER')
+        ->sum('amount_cents');
+
+    $previousTotal = $previousWithdrawals - $previousHandovers;
+
+    // Transactions in selected range
+    $query = VaultMovement::with(['fromVault','toVault','purpose','createdByUser']);
+    if ($userId && $userId !== 'all') $query->where('created_by', $userId);
+    $transactions = $query->whereBetween('created_at', [$from, $to])
+        ->orderBy('created_at','asc')
+        ->get();
+
+    return response()->json([
+        'previous_total' => $previousTotal,
+        'transactions' => $transactions
+    ]);
+}
 
 }
