@@ -171,7 +171,7 @@ function CashRequestProcess() {
             <g transform="translate(450, 400)">
               <rect width="120" height="60" fill="white" stroke="var(--primary-color)" strokeWidth="2" rx="8"/>
               <text x="60" y="25" textAnchor="middle" fontSize="11" fontWeight="bold">Create Movement</text>
-              <text x="60" y="45" textAnchor="middle" fontSize="10">Main → Sub vault</text>
+              <text x="60" y="45" textAnchor="middle" fontSize="10">Main Vault → TELLER (Sub Vault)</text>
             </g>
 
             {/* Cash Handover */}
@@ -253,14 +253,14 @@ function VaultMovementProcess() {
             <g transform="translate(350, 50)">
               <rect width="120" height="60" fill="white" stroke="var(--primary-color)" strokeWidth="2" rx="8"/>
               <text x="60" y="25" textAnchor="middle" fontSize="11" fontWeight="bold">WITHDRAWAL</text>
-              <text x="60" y="45" textAnchor="middle" fontSize="10">Main → Sub vault</text>
+              <text x="60" y="45" textAnchor="middle" fontSize="10">Main Vault → TELLER (Sub Vault)</text>
             </g>
 
             {/* Handover Branch */}
             <g transform="translate(350, 200)">
               <rect width="120" height="60" fill="white" stroke="var(--primary-color)" strokeWidth="2" rx="8"/>
               <text x="60" y="25" textAnchor="middle" fontSize="11" fontWeight="bold">HANDOVER</text>
-              <text x="60" y="45" textAnchor="middle" fontSize="10">Sub → Main vault</text>
+              <text x="60" y="45" textAnchor="middle" fontSize="10">TELLER (Sub Vault) → Main Vault</text>
             </g>
 
             {/* Prepare Cash */}

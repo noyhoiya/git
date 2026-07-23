@@ -31,12 +31,22 @@ Route::middleware(['auth:sanctum'])->group(function () {
     
     // Cash Requests API
     Route::apiResource('cash-requests', CashRequestController::class);
-    Route::post('/cash-requests/{id}/approve', [CashRequestController::class, 'approve']);
-    Route::post('/cash-requests/{id}/reject', [CashRequestController::class, 'reject']);
+    Route::post('/cash-requests/{id}/approve', [CashRequestController::class, 'approve'])
+        ->middleware('role:MAIN_VAULT');
+    Route::post('/cash-requests/{id}/reject', [CashRequestController::class, 'reject'])
+        ->middleware('role:MAIN_VAULT');
     
     // Vault Movements API
-    Route::apiResource('vault-movements', VaultMovementController::class);
-    Route::post('/vault-movements/{id}/post', [VaultMovementController::class, 'postMovement']);
+    Route::apiResource('vault-movements', VaultMovementController::class)
+        ->except(['store', 'update', 'destroy']);
+    Route::post('/vault-movements', [VaultMovementController::class, 'store'])
+        ->middleware('role:MAIN_VAULT');
+    Route::put('/vault-movements/{id}', [VaultMovementController::class, 'update'])
+        ->middleware('role:MAIN_VAULT');
+    Route::delete('/vault-movements/{id}', [VaultMovementController::class, 'destroy'])
+        ->middleware('role:MAIN_VAULT');
+    Route::post('/vault-movements/{id}/post', [VaultMovementController::class, 'postMovement'])
+        ->middleware('role:MAIN_VAULT');
     
     // Vault Status API
     Route::get('/vaults', function () {

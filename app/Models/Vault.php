@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 
 class Vault extends Model
 {
@@ -105,8 +106,8 @@ public function updateBalance($amountCents, $operation = 'add')
 
     // Insert debug log
     DB::table('transaction_debug_logs')->insert([
-        'from_vault_id' => $this->id,
-        'to_vault_id'   => $toVault->id,
+        'from_vault_id' => $this->vault_id,
+        'to_vault_id'   => $toVault->vault_id,
         'amount'        => $amount,
         'operation_from'=> 'subtract',
         'operation_to'  => 'add',

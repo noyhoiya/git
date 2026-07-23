@@ -33,51 +33,51 @@ Route::middleware(['auth'])->group(function () {
     // Cash Requests
     Route::resource('cash-requests', CashRequestController::class);
     Route::post('/cash-requests/{id}/approve', [CashRequestController::class, 'approve'])
+        ->middleware('role:MAIN_VAULT')
         ->name('cash-requests.approve');
     Route::post('/cash-requests/{id}/reject', [CashRequestController::class, 'reject'])
+        ->middleware('role:MAIN_VAULT')
         ->name('cash-requests.reject');
-        // routes/web.php
-
-
-Route::get('/cash-requests/{id}/pdf', [CashRequestPdfController::class, 'show'])
-    ->name('cash-requests.pdf');
-// routes/web.php
-Route::get('/cash-requests', [CashRequestController::class, 'index'])->name('cash-requests.index');
-
+    Route::get('/cash-requests/{id}/pdf', [CashRequestPdfController::class, 'show'])
+        ->name('cash-requests.pdf');
 
 
     // Vault Movements
-    Route::resource('vault-movements', VaultMovementController::class);
+    Route::resource('vault-movements', VaultMovementController::class)
+        ->only(['index', 'show', 'destroy']);
+    Route::get('/vault-movements/create', [VaultMovementController::class, 'create'])
+        ->middleware('role:MAIN_VAULT')
+        ->name('vault-movements.create');
+    Route::post('/vault-movements', [VaultMovementController::class, 'store'])
+        ->middleware('role:MAIN_VAULT')
+        ->name('vault-movements.store');
     Route::post('/vault-movements/{id}/post', [VaultMovementController::class, 'postMovement'])
+        ->middleware('role:MAIN_VAULT')
         ->name('vault-movements.postMovement');
-    Route::delete('/vault-movements/{id}', [VaultMovementController::class, 'destroy'])->name('vault-movements.destroy');
 
-//FOR EXPORT
-        Route::get('/vault-movements/export/excel', [VaultMovementController::class, 'exportExcel'])->name('vault-movements.export.excel');
-        Route::get('/vault-movements/export/pdf', [VaultMovementController::class, 'exportPDF'])->name('vault-movements.export.pdf');
-        Route::get('/vault-movements/export/word', [VaultMovementController::class, 'exportWord'])->name('vault-movements.export.word');
+    // Export
+    Route::get('/vault-movements/export/excel', [VaultMovementController::class, 'exportExcel'])->name('vault-movements.export.excel');
+    Route::get('/vault-movements/export/pdf', [VaultMovementController::class, 'exportPDF'])->name('vault-movements.export.pdf');
+    Route::get('/vault-movements/export/word', [VaultMovementController::class, 'exportWord'])->name('vault-movements.export.word');
 
 
     // Vaults
     Route::resource('vaults', VaultController::class);
     Route::get('/vaults/{id}/balance', [VaultController::class, 'getBalance'])
         ->name('vaults.balance');
-        // web.php
-Route::post('/vault/handover-debug', [VaultController::class, 'handoverDebug']);
-Route::get('/vault/debug-logs', [VaultController::class, 'showDebugLogs']);
-
-
+    Route::post('/vault/handover-debug', [VaultController::class, 'handoverDebug']);
+    Route::get('/vault/debug-logs', [VaultController::class, 'showDebugLogs']);
 
 
     // User Management (Admin only)
-Route::prefix('users')->group(function () {
-    Route::get('/', [UserController::class, 'index'])->name('users.index');
-    Route::get('/create', [UserController::class, 'create'])->name('users.create');
-    Route::post('/store', [UserController::class, 'store'])->name('users.store');
-    Route::get('/{user}/edit', [UserController::class, 'edit'])->name('users.edit');
-    Route::put('/{user}', [UserController::class, 'update'])->name('users.update');
-    Route::delete('/{user}', [UserController::class, 'destroy'])->name('users.destroy');
-});
+    Route::prefix('users')->group(function () {
+        Route::get('/', [UserController::class, 'index'])->name('users.index');
+        Route::get('/create', [UserController::class, 'create'])->name('users.create');
+        Route::post('/store', [UserController::class, 'store'])->name('users.store');
+        Route::get('/{user}/edit', [UserController::class, 'edit'])->name('users.edit');
+        Route::put('/{user}', [UserController::class, 'update'])->name('users.update');
+        Route::delete('/{user}', [UserController::class, 'destroy'])->name('users.destroy');
+    });
 
 
     // Reports

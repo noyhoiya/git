@@ -40,7 +40,7 @@
             <label class="block text-gray-700 mb-2">ເລືອກ Vault</label>
             <select name="requester_vault_id" class="w-full border rounded-lg px-3 py-2" required>
             <option value="">-- ເລືອກ Vault --</option>
-            <?php $__currentLoopData = $vaults->where('vault_type', 'MAIN'); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $vault): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+            <?php $__currentLoopData = $vaults->where('vault_type', 'SUB'); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $vault): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                 <option value="<?php echo e($vault->vault_id); ?>" <?php echo e(old('requester_vault_id') == $vault->vault_id ? 'selected' : ''); ?>>
                     <?php echo e($vault->vault_name); ?>
 

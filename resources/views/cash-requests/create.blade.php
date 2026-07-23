@@ -39,7 +39,7 @@
             <label class="block text-gray-700 mb-2">ເລືອກ Vault</label>
             <select name="requester_vault_id" class="w-full border rounded-lg px-3 py-2" required>
             <option value="">-- ເລືອກ Vault --</option>
-            @foreach($vaults->where('vault_type', 'MAIN') as $vault)
+            @foreach($vaults->where('vault_type', 'SUB') as $vault)
                 <option value="{{ $vault->vault_id }}" {{ old('requester_vault_id') == $vault->vault_id ? 'selected' : '' }}>
                     {{ $vault->vault_name }}
                 </option>

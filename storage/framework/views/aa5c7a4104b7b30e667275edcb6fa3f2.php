@@ -93,7 +93,7 @@
                                 ສະແດງ
                             </button>
 
-                            <form action="<?php echo e(route('vault-movements.postMovement', $movement->movement_id)); ?>" method="POST" class="inline">
+                            <form action="<?php echo e(route('vault-movements.postMovement', $movement->movement_id)); ?>" method="POST" class="inline" onsubmit="this.querySelector('button').disabled=true;">
                                 <?php echo csrf_field(); ?>
                                 <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded-2xl rounded transition-all text-sm">ບັນທຶກ</button>
                             </form>

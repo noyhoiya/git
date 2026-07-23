@@ -34,7 +34,7 @@ class UserController extends Controller
         User::create([
             'full_name' => $request->full_name,
             'username' => $request->username,
-            'password_hash' => Hash::make($request->password_hash),
+            'password_hash' => Hash::make($request->password),
             'role_id' => $request->role_id,
             'is_active' => $request->is_active,
         ]);
@@ -53,7 +53,7 @@ class UserController extends Controller
         $request->validate([
             'full_name' => 'required|string|max:255',
             'username' => 'required|string|max:50|unique:users,username,' . $user->user_id . ',user_id',
-            'password_hash' => 'nullable|string|min:6|confirmed',
+            'password' => 'nullable|string|min:6|confirmed',
             'role_id' => 'required|exists:roles,role_id',
             'is_active' => 'required|boolean',
         ]);
@@ -61,7 +61,9 @@ class UserController extends Controller
         $user->update([
             'full_name' => $request->full_name,
             'username' => $request->username,
-            'password' => $request->password_hash ? Hash::make($request->password_hash) : $user->password_hash,
+            'password_hash' => $request->password
+                ? Hash::make($request->password)
+                : $user->password_hash,
             'role_id' => $request->role_id,
             'is_active' => $request->is_active,
         ]);

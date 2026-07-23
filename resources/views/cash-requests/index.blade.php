@@ -59,9 +59,9 @@
                                         </button>
 
                                         {{-- Only show Approve/Reject if status is PENDING --}}
-                                        @if($cashRequest->status === 'PENDING')
+                                        @if($cashRequest->status === 'PENDING' && auth()->user()->hasRole('MAIN_VAULT'))
                                             <div class="flex justify-center items-center gap-2">
-                                                <form action="{{ route('cash-requests.approve', $cashRequest->request_id) }}" method="POST">
+                                                <form action="{{ route('cash-requests.approve', $cashRequest->request_id) }}" method="POST" onsubmit="this.querySelector('button').disabled=true;">
                                                     @csrf
                                                     <button type="submit" class="bg-green-500 hover:bg-green-600 text-white p-2 rounded-full" title="Approve">
                                                         <i data-lucide="check" class="w-4 h-4"></i>

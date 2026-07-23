@@ -38,13 +38,16 @@ class AuthController extends Controller
                ->first();
 
     if ($user) {
-        // Skip password check completely
-        Auth::login($user);
-        return redirect()->intended('/dashboard');
+        if (Hash::check($credentials['password'], $user->password_hash)) {
+            Auth::login($user, $request->boolean('remember'));
+            $request->session()->regenerate();
+
+            return redirect()->intended('/dashboard');
+        }
     }
 
     return back()->withErrors([
-        'username' => 'User not found or account is inactive.',
+        'username' => 'The username or password is incorrect.',
     ]);
 }
 

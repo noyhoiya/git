@@ -22,7 +22,7 @@ class User extends Authenticatable
     ];
 
     protected $hidden = [
-        'password',
+        'password_hash',
         'remember_token',
     ];
 
@@ -32,6 +32,11 @@ class User extends Authenticatable
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
+
+    public function getAuthPasswordName()
+    {
+        return 'password_hash';
+    }
 
     public function role()
     {

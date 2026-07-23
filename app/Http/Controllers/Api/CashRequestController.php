@@ -6,9 +6,11 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\CashRequest;
 use App\Models\Vault;
+use App\Models\VaultMovement;
 use App\Models\Purpose;
 use App\Models\User;
 use App\Notifications\NewCashRequest;
+use Illuminate\Support\Facades\DB;
 
 class CashRequestController extends Controller
 {
@@ -49,7 +51,7 @@ class CashRequestController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'requester_vault_id' => 'required|exists:vaults,vault_id',
+            'requester_vault_id' => 'required|exists:vaults,vault_id,vault_type,SUB',
             'amount' => 'required|numeric|min:0.01',
             'amount_in_words' => 'required|string',
             'purpose_code' => 'required|exists:purposes,purpose_code',
@@ -170,32 +172,49 @@ class CashRequestController extends Controller
      */
     public function approve(Request $request, $id)
     {
-        $cashRequest = CashRequest::findOrFail($id);
-        
-        if (!$cashRequest->isPending()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Request is not pending'
-            ], 400);
+        abort_unless(auth()->user()?->hasRole('MAIN_VAULT'), 403, 'Only the MAIN vault can approve requests.');
+
+        $result = DB::transaction(function () use ($id, $request) {
+            $cashRequest = CashRequest::whereKey($id)->lockForUpdate()->firstOrFail();
+
+            if (!$cashRequest->isPending()) {
+                return ['error' => 'Request is not pending', 'status' => 400];
+            }
+
+            $mainVault = Vault::where('vault_type', 'MAIN')->first();
+
+            if (!$mainVault || $cashRequest->requesterVault->vault_type !== 'SUB') {
+                return ['error' => 'A cash request must transfer from the MAIN vault to a SUB vault.', 'status' => 422];
+            }
+
+            if (VaultMovement::where('request_id', $cashRequest->request_id)->exists()) {
+                return ['error' => 'A vault movement already exists for this request.', 'status' => 409];
+            }
+
+            $cashRequest->approve(auth()->id(), $request->notes);
+
+            $vaultMovement = VaultMovement::create([
+                'type' => 'WITHDRAWAL',
+                'from_vault_id' => $mainVault->vault_id,
+                'to_vault_id' => $cashRequest->requester_vault_id,
+                'request_id' => $cashRequest->request_id,
+                'amount_cents' => $cashRequest->amount_cents,
+                'amount_in_words' => $cashRequest->amount_in_words,
+                'purpose_code' => $cashRequest->purpose_code,
+                'purpose_text' => $cashRequest->purpose_text,
+                'status' => 'DRAFT',
+                'created_by_user_id' => auth()->id(),
+            ]);
+
+            return ['cash_request' => $cashRequest, 'vault_movement' => $vaultMovement];
+        });
+
+        if (isset($result['error'])) {
+            return response()->json(['success' => false, 'message' => $result['error']], $result['status']);
         }
 
-        $cashRequest->approve(auth()->id(), $request->notes);
-
-        // Create corresponding vault movement
-        $mainVault = Vault::where('vault_type', 'MAIN')->first();
-        
-        $vaultMovement = VaultMovement::create([
-            'type' => 'WITHDRAWAL',
-            'from_vault_id' => $mainVault->vault_id,
-            'to_vault_id' => $cashRequest->requester_vault_id,
-            'request_id' => $cashRequest->request_id,
-            'amount_cents' => $cashRequest->amount_cents,
-            'amount_in_words' => $cashRequest->amount_in_words,
-            'purpose_code' => $cashRequest->purpose_code,
-            'purpose_text' => $cashRequest->purpose_text,
-            'status' => 'DRAFT',
-            'created_by_user_id' => auth()->id(),
-        ]);
+        $cashRequest = $result['cash_request'];
+        $vaultMovement = $result['vault_movement'];
 
         return response()->json([
             'success' => true,
@@ -212,6 +231,8 @@ class CashRequestController extends Controller
      */
     public function reject(Request $request, $id)
     {
+        abort_unless(auth()->user()?->hasRole('MAIN_VAULT'), 403, 'Only the MAIN vault can reject requests.');
+
         $cashRequest = CashRequest::findOrFail($id);
         
         if (!$cashRequest->isPending()) {

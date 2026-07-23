@@ -59,9 +59,9 @@
                                         </button>
 
                                         
-                                        <?php if($cashRequest->status === 'PENDING'): ?>
+                                        <?php if($cashRequest->status === 'PENDING' && auth()->user()->hasRole('MAIN_VAULT')): ?>
                                             <div class="flex justify-center items-center gap-2">
-                                                <form action="<?php echo e(route('cash-requests.approve', $cashRequest->request_id)); ?>" method="POST">
+                                                <form action="<?php echo e(route('cash-requests.approve', $cashRequest->request_id)); ?>" method="POST" onsubmit="this.querySelector('button').disabled=true;">
                                                     <?php echo csrf_field(); ?>
                                                     <button type="submit" class="bg-green-500 hover:bg-green-600 text-white p-2 rounded-full" title="Approve">
                                                         <i data-lucide="check" class="w-4 h-4"></i>

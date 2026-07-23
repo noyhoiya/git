@@ -81,15 +81,27 @@ class VaultController extends Controller
     }
 public function handoverDebug(Request $request)
 {
-    $mainVault = Vault::find($request->main_vault_id);
-    $tellerVault = Vault::find($request->teller_id);
-    $userId = auth()->id();
-    $amount = abs($request->amount); // Ensure amount is positive
+    $validated = $request->validate([
+        'main_vault_id' => ['required', 'integer', 'exists:vaults,vault_id'],
+        'teller_id' => ['required', 'integer', 'exists:vaults,vault_id'],
+        'amount' => ['required', 'numeric', 'gt:0'],
+    ]);
 
-    if (!$mainVault || !$tellerVault) {
+    $mainVault = Vault::find($validated['main_vault_id']);
+    $tellerVault = Vault::find($validated['teller_id']);
+    $userId = auth()->id();
+    $amount = $validated['amount'];
+
+    if ($mainVault->vault_type !== 'MAIN' || $tellerVault->vault_type !== 'SUB') {
         return response()->json([
-            'error' => 'Vault not found'
-        ], 404);
+            'error' => 'Handover must transfer from a MAIN vault to a SUB vault.'
+        ], 422);
+    }
+
+    if ($mainVault->vault_id === $tellerVault->vault_id) {
+        return response()->json([
+            'error' => 'Source and destination vaults must be different.'
+        ], 422);
     }
 
     // Call Vault method to handle transfer
@@ -120,6 +132,7 @@ public function handoverDebug(Request $request)
 public function showDebugLogs()
 {
     $logs = DB::table('transaction_debug_logs')
+        ->whereColumn('from_vault_id', '!=', 'to_vault_id')
         ->orderBy('created_at', 'desc')
         ->get()
         ->map(function ($log) {
@@ -138,7 +151,7 @@ public function showDebugLogs()
                 ])
                 ->exists();
 
-            $log->is_duplicate = $duplicate;
+            $log->is_duplicate = (bool) $log->is_duplicate || $duplicate;
 
             return $log;
         });
