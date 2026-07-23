@@ -60,9 +60,10 @@
 @endphp
 
 @if($isAllowed)
-    <!-- Notify Button -->
-    <div class="relative inline-block text-left">
-    <button id="notifyButton" class="relative p-2 rounded-full bg-gradient-to-br from-blue-500 to-green-600 hover:scale-110 transition-transform shadow-md flex items-center justify-center focus:outline-none">
+<!-- Notify Button -->
+<div class="relative inline-block text-left">
+    <button id="notifyButton" 
+        class="relative p-2 rounded-full bg-gradient-to-br from-blue-500 to-green-600 hover:scale-110 transition-transform shadow-md flex items-center justify-center focus:outline-none">
         <!-- Bell Icon -->
         <div class="relative w-4 h-4 flex flex-col items-center">
             <div class="w-3 h-3 bg-white rounded-t-full border-b-[2px] border-white"></div>
@@ -70,48 +71,42 @@
         </div>
 
         <!-- Notification dot -->
-        @if(session()->has('cash_request_alerts') && count(session('cash_request_alerts')) > 0)
+        @if(auth()->user()->unreadNotifications->count() > 0)
             <span class="absolute top-0.5 right-0.5 w-2 h-2 bg-red-500 border border-white rounded-full animate-ping"></span>
             <span class="absolute top-0.5 right-0.5 w-2 h-2 bg-red-500 rounded-full"></span>
         @endif
     </button>
 
-<div id="notifyDropdown" class="hidden absolute right-0 mt-2 w-96 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
-
+    <!-- Dropdown -->
+    <div id="notifyDropdown" class="hidden absolute right-0 mt-2 w-96 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
         <div class="p-2 border-b border-gray-100 font-semibold">ການແຈ້ງເຕືອນ</div>
         <ul class="max-h-64 overflow-y-auto">
-            @if(session()->has('cash_request_alerts') && count(session('cash_request_alerts')) > 0)
-                @foreach(session('cash_request_alerts') as $request)
-              <li class="p-2 hover:bg-gray-100 rounded flex justify-between items-center" data-request-id="{{ $request->request_id }}">
-    <!-- Make link fill all text space -->
-    <a href="{{ route('cash-requests.index', ['id' => $request->request_id]) }}" 
-       class="flex-1 cursor-pointer no-underline text-gray-800">
-        <div>
-            <p class="text-sm font-medium">
-               {{ $request->request_id }}  {{ $request->requesterUser->full_name }} 
-            </p>
-            <p class="text-xs text-gray-500">
-                ຄຳຂໍ {{ number_format($request->amount, 2) }} ກີບ
-                {{ $request->requesterVault->vault_name ?? 'a vault' }}
+            @forelse(auth()->user()->unreadNotifications as $notification)
+                @php
+                    $data = $notification->data;
+                @endphp
+                <li class="p-2 hover:bg-gray-100 rounded flex justify-between items-center" data-id="{{ $notification->id }}">
+                    <a href="{{ route('cash-requests.index', ['id' => $data['request_id']]) }}" 
+                       class="flex-1 cursor-pointer no-underline text-gray-800">
+                        <div>
+                            <p class="text-sm font-medium">{{ $data['requester_name'] }}</p>
+                            <p class="text-xs text-gray-500">
+                                ຄຳຂໍ {{ number_format($data['amount'], 2) }} ກີບ
+                                {{ $data['vault_name'] ?? 'a vault' }}
+                                at {{ \Carbon\Carbon::parse($data['created_at'])->format('d M Y H:i') }}
+                            </p>
+                        </div>
+                    </a>
 
-                   at {{ \Carbon\Carbon::parse($request['created_at'])->format('d M Y H:i') }}
-
-            
-            </p>
-        </div>
-    </a>
-
-    <!-- Dismiss button -->
-    <button class="dismissBtn ml-2 px-2 py-1 bg-red-600 text-white rounded text-xs hover:bg-red-700 transition flex items-center justify-center">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M1 7h22M8 7V4a1 1 0 011-1h6a1 1 0 011 1v3" />
-        </svg>
-    </button>
-</li>
-                @endforeach
-            @else
+                    <button class="dismissBtn ml-2 px-2 py-1 bg-red-600 text-white rounded text-xs hover:bg-red-700 transition flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M1 7h22M8 7V4a1 1 0 011-1h6a1 1 0 011 1v3" />
+                        </svg>
+                    </button>
+                </li>
+            @empty
                 <li class="p-2 text-gray-500">ບໍ່ມີການແຈ້ງເຕືອນ.</li>
-            @endif
+            @endforelse
         </ul>
     </div>
 </div>
@@ -267,28 +262,24 @@ document.addEventListener('DOMContentLoaded', function() {
     const notifyButton = document.getElementById('notifyButton');
     const notifyDropdown = document.getElementById('notifyDropdown');
 
-    // Toggle dropdown visibility
     notifyButton.addEventListener('click', (e) => {
         e.stopPropagation();
         notifyDropdown.classList.toggle('hidden');
     });
 
-    // Close dropdown when clicking outside
     window.addEventListener('click', (e) => {
         if (!notifyButton.contains(e.target) && !notifyDropdown.contains(e.target)) {
             notifyDropdown.classList.add('hidden');
         }
     });
 
-    // Dismiss each notification
-    const dismissButtons = notifyDropdown.querySelectorAll('.dismissBtn');
-    dismissButtons.forEach(btn => {
-        btn.addEventListener('click', function(e) {
-            e.stopPropagation(); // prevent dropdown from closing immediately
-            const li = btn.closest('li'); // the <li> element to remove
-            const requestId = li.dataset.requestId; // get the alert ID
+    // Dismiss button
+    notifyDropdown.querySelectorAll('.dismissBtn').forEach(btn => {
+        btn.addEventListener('click', function(e){
+            e.stopPropagation();
+            const li = btn.closest('li');
+            const id = li.dataset.id;
 
-            // --- FETCH POST request to dismiss ---
             fetch("{{ route('dismiss.cash.alert') }}", {
                 method: "POST",
                 headers: {
@@ -296,18 +287,17 @@ document.addEventListener('DOMContentLoaded', function() {
                     "Accept": "application/json",
                     "Content-Type": "application/json"
                 },
-                body: JSON.stringify({ id: requestId }) // send alert ID to backend
+                body: JSON.stringify({ id: id })
             })
             .then(res => res.json())
             .then(data => {
                 if(data.status === "success"){
-                    li.remove(); // remove only this alert from DOM
+                    li.remove();
                 }
             });
         });
     });
 });
-
 
   lucide.createIcons(); // initialize all icons
   // dark mode toggle

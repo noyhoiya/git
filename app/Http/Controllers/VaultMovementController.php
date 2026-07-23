@@ -23,6 +23,8 @@ return view('vault-movements.index', compact('movements'));
 
     public function create()
     {
+        abort_unless(auth()->user()?->hasRole('MAIN_VAULT'), 403, 'Only the MAIN vault can create movements.');
+
         $vaults = Vault::where('is_active', true)->get();
         $purposes = Purpose::all();
 
@@ -31,6 +33,8 @@ return view('vault-movements.index', compact('movements'));
 
   public function store(Request $request)
 {
+        abort_unless(auth()->user()?->hasRole('MAIN_VAULT'), 403, 'Only the MAIN vault can create movements.');
+
     $validated = $request->validate([
         'type' => 'required|in:WITHDRAWAL,HANDOVER',
         'from_vault_id' => 'required|exists:vaults,vault_id',
@@ -82,6 +86,8 @@ foreach ($denominations as $i => $denom) {
 
 public function postMovement($id)
 {
+    abort_unless(auth()->user()?->hasRole('MAIN_VAULT'), 403, 'Only the MAIN vault can post movements.');
+
     $movement = VaultMovement::findOrFail($id);
 
     if ($movement->status === 'POSTED') {
@@ -90,13 +96,28 @@ public function postMovement($id)
 
     try {
         DB::transaction(function () use ($movement) {
+    $movement = VaultMovement::whereKey($movement->getKey())->lockForUpdate()->firstOrFail();
+
+    if ($movement->status === 'POSTED') {
+        throw new \Exception('Movement already posted');
+    }
+
+    // Lock vault rows (consistent order avoids deadlocks) so concurrent posts cannot double-transfer.
+    $vaultIds = [$movement->from_vault_id, $movement->to_vault_id];
+    sort($vaultIds);
+    Vault::whereIn('vault_id', $vaultIds)->lockForUpdate()->get();
+
     $fromVault = Vault::findOrFail($movement->from_vault_id);
     $toVault   = Vault::findOrFail($movement->to_vault_id);
 
-    $amount = $movement->amount_cents;
+    $amount = (int) $movement->amount_cents;
 
     if ($amount <= 0) {
         throw new \Exception("Amount must be positive.");
+    }
+
+    if ($fromVault->vault_type !== 'MAIN' || $toVault->vault_type !== 'SUB') {
+        throw new \Exception("Movement must transfer from the MAIN vault to a SUB vault.");
     }
 
     // ตรวจสอบ balance เพียงพอ
@@ -104,13 +125,11 @@ public function postMovement($id)
         throw new \Exception("ເງິນສົດໃນຄັງບໍ່ພຽງພໍ.");
     }
 
-    // ❌ ลบการเรียก updateBalance() ของ Vault Model
-    // ทำ balance เอง
     $balanceFromBefore = $fromVault->current_balance_cents;
     $balanceToBefore   = $toVault->current_balance_cents;
 
-    // $fromVault->current_balance_cents -= $amount;
-    // $toVault->current_balance_cents   += $amount;
+    $fromVault->current_balance_cents -= $amount;
+    $toVault->current_balance_cents += $amount;
 
     $fromVault->save();
     $toVault->save();
@@ -119,22 +138,7 @@ public function postMovement($id)
     $movement->posted_at = now();
     $movement->released_by_user_id = auth()->id();
     $movement->save();
-    $denominations = json_decode($movement->denominations_temp, true) ?? [];
-$quantities = json_decode($movement->quantities_temp, true) ?? [];
 
-foreach ($denominations as $i => $denom) {
-    if ($denom && isset($quantities[$i])) {
-        $movement->denominations()->create([
-            'denomination' => $denom,
-            'quantity' => $quantities[$i],
-        ]);
-    }
-}
-
-
-
-
-   
     DB::table('transaction_debug_logs')->insert([
        'from_vault_id'       => $movement->from_vault_id,
         'to_vault_id'         => $movement->to_vault_id,
@@ -154,13 +158,17 @@ foreach ($denominations as $i => $denom) {
         return back()->with('error', $e->getMessage());
     }
 
-    return back()->with('success', 'ບັນທຶກສຳເລັດ!');
+    return redirect()
+        ->route('vault-movements.index')
+        ->with('success', 'ບັນທຶກສຳເລັດ!');
 }
 
 
 
     public function destroy($id)
 {
+    abort_unless(auth()->user()?->hasRole('MAIN_VAULT'), 403, 'Only the MAIN vault can delete movements.');
+
     $movement = VaultMovement::findOrFail($id);
 
     // Only allow deletion if DRAFT

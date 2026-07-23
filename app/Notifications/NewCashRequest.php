@@ -19,11 +19,17 @@ class NewCashRequest extends Notification
         $this->cashRequest = $cashRequest;
     }
 
+    /**
+     * Specify delivery channels.
+     */
     public function via($notifiable)
     {
-        return ['mail']; // only email, no database
+        return ['mail', 'database']; // now saves to DB as well
     }
 
+    /**
+     * Email content
+     */
     public function toMail($notifiable)
     {
         return (new MailMessage)
@@ -31,8 +37,22 @@ class NewCashRequest extends Notification
                     ->greeting('Hello '.$notifiable->full_name)
                     ->line($this->cashRequest->requesterUser->full_name.' requested '
                         .number_format($this->cashRequest->amount, 2).' from '
-                        .$this->cashRequest->requesterVault->name)
-                    ->action('View Request', url('/cash-requests')) // optional link
+                        .$this->cashRequest->requesterVault->vault_name)
+                    ->action('View Request', url('/cash-requests'))
                     ->line('Thank you for using our system!');
+    }
+
+    /**
+     * Database content for notifications table
+     */
+    public function toDatabase($notifiable)
+    {
+        return [
+            'request_id' => $this->cashRequest->id,
+            'amount' => $this->cashRequest->amount,
+            'vault_name' => $this->cashRequest->requesterVault->vault_name ?? null,
+            'requester_name' => $this->cashRequest->requesterUser->full_name,
+            'created_at' => $this->cashRequest->created_at,
+        ];
     }
 }

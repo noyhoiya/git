@@ -10,6 +10,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Auth\EmailVerificationNotificationController;
 use App\Http\Controllers\Auth\EmailVerificationPromptController;
 use App\Http\Controllers\CashRequestPdfController;
+use App\Http\Controllers\ReportDenominationController;
 
 /*
 |--------------------------------------------------------------------------
@@ -82,6 +83,9 @@ Route::prefix('users')->group(function () {
     // Reports
     Route::get('/reports', [DashboardController::class, 'reports'])->name('reports');
     Route::get('/reports/cash-flow', [DashboardController::class, 'cashFlowReport'])->name('reports.cashFlow');
+    //denom report
+    Route::get('/reports/denomination', [ReportDenominationController::class, 'index'])->name('reports.denomination');
+    Route::get('/reports/denomination/data', [ReportDenominationController::class, 'data'])->name('reports.denomination.data');
 
     //Email
     Route::post('/email/verification-notification', [EmailVerificationNotificationController::class, 'store'])

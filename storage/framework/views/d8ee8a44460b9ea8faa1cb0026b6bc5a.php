@@ -40,9 +40,10 @@
         <div>
             <label for="period" class="form-label">ເລືອກໄລຍະເວລາ</label>
             <select id="period" class="form-select w-48">
-                <option value="7days">7 ມື້ລ່າສຸດ</option>
-                <option value="30days">30 ມື້ລ່າສຸດ</option>
-                <option value="custom">ກຳນົດເອງ</option>
+            <option value="today">ມື້ນີ້</option>
+            <option value="7days">7 ມື້ຜ່ານມາ</option>
+            <option value="30days">30 ມື້ຜ່ານມາ</option>
+            <option value="custom">ກຳນົດເອງ</option>
             </select>
         </div>
 
@@ -175,38 +176,65 @@ function loadReport() {
     const userId = userSelect.value;
     const tableBody = document.getElementById('reportTable');
 
+    // Show loading message
     tableBody.innerHTML = '<tr><td colspan="8" class="text-center py-1">ກຳລັງໂຫຼດ...</td></tr>';
 
+    // Build URL
     let url = `<?php echo e(route('reports.cashFlow')); ?>?period=${period}`;
-    if (period === 'custom') url += `&from=${from}&to=${to}`;
+    if (period === 'custom' && from && to) url += `&from=${from}&to=${to}`;
     if (userId && userId !== 'all') url += `&user_id=${userId}`;
 
     fetch(url, { credentials: 'same-origin' })
         .then(res => res.json())
         .then(data => {
             tableBody.innerHTML = '';
+
             const transactions = data.transactions || [];
             const lastTotal = parseFloat(data.previous_total || 0);
 
+            // If no transactions found
             if (!transactions.length) {
-                tableBody.innerHTML = '<tr><td colspan="8" class="text-center py-1">ບໍ່ມີລາຍການ</td></tr>';
+                tableBody.innerHTML = `
+                    <tr><td colspan="8" class="text-center py-1">ບໍ່ມີລາຍການ</td></tr>
+                    <tr class="font-bold bg-gray-100">
+                        <td colspan="6" class="text-right">ຍອດຍົກມາ</td>
+                        <td class="text-right">${lastTotal.toLocaleString()}</td>
+                    </tr>
+                `;
                 tableBody.dataset.lastTotal = lastTotal;
                 tableBody.dataset.finalTotal = lastTotal;
                 return;
             }
 
+            // Totals
             let totalWithdraw = 0;
             let totalHandover = 0;
             let currentBalance = lastTotal;
             let rows = '';
 
+            // Add row for previous total
+            rows += `
+                <tr class=" font-bold bg-gray-50 text-gray-700 underline">
+                    <td colspan="3"></td>
+                    <td colspan="" class="text-right">ຍອດຍົກມາແຕ່ມື້ກ່ອນ</td>
+                    <td colspan="1"></td>
+                    <td colspan="1"></td>
+                    <td class="text-right  ">${lastTotal.toLocaleString()}</td>
+
+                </tr>
+            `;
+
+            // Loop through transactions
             transactions.forEach((item, index) => {
-                let withdrawAmount = item.type === 'WITHDRAWAL' ? item.amount_cents : 0;
-                let handoverAmount = item.type === 'HANDOVER' ? item.amount_cents : 0;
+                const withdrawAmount = item.type === 'WITHDRAWAL' ? parseFloat(item.amount_cents) : 0;
+                const handoverAmount = item.type === 'HANDOVER' ? parseFloat(item.amount_cents) : 0;
 
                 totalWithdraw += withdrawAmount;
                 totalHandover += handoverAmount;
+
+                // Balance calculation (from start of period)
                 currentBalance = lastTotal + totalWithdraw - totalHandover;
+                totalBalance = lastTotal + currentBalance ;
 
                 rows += `
                     <tr>
@@ -221,7 +249,7 @@ function loadReport() {
                 `;
             });
 
-            // Add totals row
+            // Summary row
             rows += `
                 <tr class="font-bold bg-gray-100">
                     <td colspan="3"></td>
@@ -238,11 +266,11 @@ function loadReport() {
         })
         .catch(err => {
             console.error(err);
-            tableBody.innerHTML = '<tr><td colspan="8" class="text-center py-1 text-red-500">Error loading data</td></tr>';
+            tableBody.innerHTML = '<tr><td colspan="8" class="text-center py-1 text-red-500">ຜິດພາດໃນການໂຫຼດຂໍ້ມູນ</td></tr>';
         });
 }
 
-
+// Event listeners
 loadReportBtn.addEventListener('click', loadReport);
 periodSelect.addEventListener('change', loadReport);
 

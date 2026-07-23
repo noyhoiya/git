@@ -55,6 +55,8 @@ class VaultMovementController extends Controller
      */
     public function store(Request $request)
     {
+        abort_unless(auth()->user()?->hasRole('MAIN_VAULT'), 403, 'Only the MAIN vault can create movements.');
+
         $validated = $request->validate([
             'type' => 'required|in:WITHDRAWAL,HANDOVER',
             'from_vault_id' => 'required|exists:vaults,vault_id',
@@ -118,6 +120,8 @@ class VaultMovementController extends Controller
      */
     public function update(Request $request, $id)
     {
+        abort_unless(auth()->user()?->hasRole('MAIN_VAULT'), 403, 'Only the MAIN vault can update movements.');
+
         $movement = VaultMovement::findOrFail($id);
 
         // Only allow updates if draft
@@ -149,6 +153,8 @@ class VaultMovementController extends Controller
      */
     public function destroy($id)
     {
+        abort_unless(auth()->user()?->hasRole('MAIN_VAULT'), 403, 'Only the MAIN vault can delete movements.');
+
         $movement = VaultMovement::findOrFail($id);
 
         // Only allow deletion if draft
@@ -172,6 +178,8 @@ class VaultMovementController extends Controller
      */
     public function postMovement(Request $request, $id)
     {
+        abort_unless(auth()->user()?->hasRole('MAIN_VAULT'), 403, 'Only the MAIN vault can post movements.');
+
         $movement = VaultMovement::findOrFail($id);
 
         if ($movement->status === 'POSTED') {
@@ -183,13 +191,27 @@ class VaultMovementController extends Controller
 
         try {
             DB::transaction(function () use ($movement) {
+                $movement = VaultMovement::whereKey($movement->getKey())->lockForUpdate()->firstOrFail();
+
+                if ($movement->status === 'POSTED') {
+                    throw new \Exception('Movement already posted');
+                }
+
+                $vaultIds = [$movement->from_vault_id, $movement->to_vault_id];
+                sort($vaultIds);
+                Vault::whereIn('vault_id', $vaultIds)->lockForUpdate()->get();
+
                 $fromVault = Vault::findOrFail($movement->from_vault_id);
                 $toVault = Vault::findOrFail($movement->to_vault_id);
 
-                $amount = $movement->amount_cents;
+                $amount = (int) $movement->amount_cents;
 
                 if ($amount <= 0) {
                     throw new \Exception("Amount must be positive.");
+                }
+
+                if ($fromVault->vault_type !== 'MAIN' || $toVault->vault_type !== 'SUB') {
+                    throw new \Exception("Movement must transfer from the MAIN vault to a SUB vault.");
                 }
 
                 // Check sufficient balance

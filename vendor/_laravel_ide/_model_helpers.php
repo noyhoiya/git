@@ -640,9 +640,9 @@ namespace App\Models {
      * @property string $purpose_name
      * @property string $purpose_code
      * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\CashRequest> $cashRequests
-     * @property-read int|null $cashRequests_count
+     * @property-read int|null $cash_requests_count
      * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\VaultMovement> $vaultMovements
-     * @property-read int|null $vaultMovements_count
+     * @property-read int|null $vault_movements_count
      * @method static \Illuminate\Database\Eloquent\Builder<Purpose>|Purpose wherePurposeCode($value)
      * @method static \Illuminate\Database\Eloquent\Builder<Purpose>|Purpose wherePurposeName($value)
      * @method static \Illuminate\Database\Eloquent\Builder<Purpose>|Purpose newModelQuery()
@@ -1241,7 +1241,6 @@ namespace App\Models {
     /**
      * App\Models\User
      *
-     * @property \Illuminate\Support\Carbon $updated_at
      * @property \Illuminate\Support\Carbon $created_at
      * @property boolean $is_active
      * @property mixed $role_id
@@ -1251,15 +1250,15 @@ namespace App\Models {
      * @property int $user_id
      * @property-read \App\Models\Role $role
      * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\CashRequest> $cashRequests
-     * @property-read int|null $cashRequests_count
+     * @property-read int|null $cash_requests_count
      * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\CashRequest> $approvedRequests
-     * @property-read int|null $approvedRequests_count
+     * @property-read int|null $approved_requests_count
      * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\VaultMovement> $createdMovements
-     * @property-read int|null $createdMovements_count
+     * @property-read int|null $created_movements_count
      * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\VaultMovement> $releasedMovements
-     * @property-read int|null $releasedMovements_count
+     * @property-read int|null $released_movements_count
      * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\VaultMovement> $receivedMovements
-     * @property-read int|null $receivedMovements_count
+     * @property-read int|null $received_movements_count
      * @property-read \Illuminate\Database\Eloquent\Collection<int, \Laravel\Sanctum\PersonalAccessToken> $tokens
      * @property-read int|null $tokens_count
      * @property-read \Illuminate\Database\Eloquent\Collection<int, \Illuminate\Notifications\DatabaseNotification> $notifications
@@ -1271,7 +1270,6 @@ namespace App\Models {
      * @method static \Illuminate\Database\Eloquent\Builder<User>|User whereRoleId($value)
      * @method static \Illuminate\Database\Eloquent\Builder<User>|User whereIsActive($value)
      * @method static \Illuminate\Database\Eloquent\Builder<User>|User whereCreatedAt($value)
-     * @method static \Illuminate\Database\Eloquent\Builder<User>|User whereUpdatedAt($value)
      * @method static \Illuminate\Database\Eloquent\Builder<User>|User newModelQuery()
      * @method static \Illuminate\Database\Eloquent\Builder<User>|User newQuery()
      * @method static \Illuminate\Database\Eloquent\Builder<User>|User query()
@@ -1576,11 +1574,11 @@ namespace App\Models {
      * @property int $vault_id
      * @property-read mixed $current_balance
      * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\CashRequest> $cashRequests
-     * @property-read int|null $cashRequests_count
+     * @property-read int|null $cash_requests_count
      * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\VaultMovement> $fromMovements
-     * @property-read int|null $fromMovements_count
+     * @property-read int|null $from_movements_count
      * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\VaultMovement> $toMovements
-     * @property-read int|null $toMovements_count
+     * @property-read int|null $to_movements_count
      * @method static \Illuminate\Database\Eloquent\Builder<Vault>|Vault whereVaultId($value)
      * @method static \Illuminate\Database\Eloquent\Builder<Vault>|Vault whereVaultName($value)
      * @method static \Illuminate\Database\Eloquent\Builder<Vault>|Vault whereVaultType($value)
